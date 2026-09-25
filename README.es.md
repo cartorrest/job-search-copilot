@@ -1,10 +1,10 @@
 # Job Search Copilot · Plantilla gratuita
 
-**Un tablero para organizar tu búsqueda de empleo o de becas, dentro de Google Sheets.** Gratis, sin programar y sin necesidad de usar inteligencia artificial.
+**Un tablero para organizar tu búsqueda de empleo, dentro de Google Sheets.** Gratis, sin programar y sin necesidad de usar inteligencia artificial.
 
 Lo construí para mi propia búsqueda de trabajo remoto. Ya conseguí trabajo, así que lo convertí en una plantilla para que tú también lo uses.
 
-[**Hacer mi copia**](SHEET_COPY_LINK) · [**Guía paso a paso**](sheets-template/SETUP_GUIDE.es.md) · [Ver demo](https://job-search-copilot-demo.vercel.app) · [English](README.md)
+[**Hacer mi copia**](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy) · [**Guía paso a paso**](sheets-template/SETUP_GUIDE.es.md) · [Ver demo](https://job-search-copilot-demo.vercel.app) · [English](README.md)
 
 ![Tablero de la plantilla](docs/img/template-board.png)
 
@@ -13,7 +13,7 @@ Lo construí para mi propia búsqueda de trabajo remoto. Ya conseguí trabajo, a
 ## Qué hace
 
 - **Tablero kanban:** una columna por etapa (Guardada, Aplicada, En proceso, Entrevista, Oferta…). Arrastras la tarjeta y listo.
-- **Empleos y becas** en el mismo lugar, con filtro.
+- **Varias rondas de entrevista:** registra cada ronda (RR. HH., técnica, final…) con sus notas, sin inventar etapas nuevas.
 - **Historial automático:** cada cambio de etapa queda registrado con fecha, y puedes agregar notas (por ejemplo, qué te preguntaron en la entrevista).
 - **Alertas de seguimiento:** marca en naranja lo que lleva 7 días (o los que elijas) sin moverse. Opcional: te llega un correo, uno solo por postulación.
 - **Métricas que sirven para decidir:**

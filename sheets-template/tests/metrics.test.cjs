@@ -83,3 +83,61 @@ test('sample data: 33 fictional applications with coherent history', () => {
   assert.equal(m.applied, 30);
   assert.equal(m.responded, 19);
 });
+
+test('interview rounds: sample data has 1-3 rounds for processes that reached an interview', () => {
+  const d = run(`(function () {
+    var data = buildSampleData_(DEFAULT_STAGES, new Date('${NOW}'));
+    var apps = data.rows.map(function (r, i) { return rowToApp_(r, i + 2); });
+    var hist = data.events.map(function (e) { return { ts: toIso_(e[0]), id: e[1], prev: e[2], next: e[3], nota: e[4] }; });
+    return { apps: apps, hist: hist, m: computeMetrics_(apps, hist, DEFAULT_STAGES, 7, '${NOW}') };
+  })()`);
+  const withRounds = d.apps.filter((a) => a.rondas > 0);
+  assert.ok(withRounds.length > 0);
+  for (const a of withRounds) {
+    assert.ok(a.rondas >= 1 && a.rondas <= 3);
+    const notes = d.hist.filter((h) => h.id === a.id && /^Ronda \d/.test(h.nota));
+    assert.equal(notes.length, a.rondas);
+    assert.ok(new Date(a.fechaMovimiento) >= new Date(notes.at(-1).ts), 'rounds count as movement');
+  }
+  assert.equal(d.m.interviewRounds.apps, withRounds.length);
+  // Rounds are notes, so they must not change funnel or stage-time numbers.
+  assert.equal(d.m.applied, 30);
+  assert.ok(d.m.avgDaysByStage.every((s) => s.avgDays > 0));
+});
+
+test('migration: a sheet from the first template version gets the new columns without losing data', () => {
+  const OLD = ['ID', 'Tipo', 'Empresa/Institución', 'Cargo/Programa', 'Link', 'Fuente', 'Fecha aplicación', 'Etapa', 'Fecha último movimiento', 'Versión CV/carta', 'Salario', 'Contacto', 'Próximo paso', 'Notas', 'Alerta enviada'];
+  const row = ['JT-0001', 'Empleo', 'Acme', 'Analyst', 'https://x', 'LinkedIn', 'd1', 'Entrevista', 'd2', 'CV v1', '', '', 'Seguir', 'nota', ''];
+  // Minimal in-memory stand-in for a Sheet.
+  const grid = [OLD.slice(), row.slice()];
+  const range = (r, c, nr = 1, nc = 1) => {
+    const self = {
+      getValues: () => grid.slice(r - 1, r - 1 + nr).map((x) => x.slice(c - 1, c - 1 + nc)),
+      setValues: (v) => { v.forEach((vr, i) => vr.forEach((val, j) => { grid[r - 1 + i][c - 1 + j] = val; })); return self; },
+      setValue: (val) => { grid[r - 1][c - 1] = val; return self; },
+      setFontWeight: () => self, setBackground: () => self, setFontColor: () => self,
+    };
+    return self;
+  };
+  const sheet = {
+    getLastColumn: () => Math.max(...grid.map((x) => x.length)),
+    getRange: range,
+    deleteColumn: (c) => grid.forEach((x) => x.splice(c - 1, 1)),
+    insertColumnBefore: (c) => grid.forEach((x) => x.splice(c - 1, 0, '')),
+    insertColumnAfter: (c) => grid.forEach((x) => x.splice(c, 0, '')),
+  };
+  ctx.__sheet = sheet;
+  vm.runInContext('migrateAppsHeaders_(__sheet)', ctx);
+  const headers = run('APP_HEADERS');
+  assert.deepEqual(grid[0], headers);
+  const get = (name) => grid[1][headers.indexOf(name)];
+  assert.equal(get('Empresa'), 'Acme');
+  assert.equal(get('Cargo'), 'Analyst');
+  assert.equal(get('Etapa'), 'Entrevista');
+  assert.equal(get('Versión de CV'), 'CV v1');
+  assert.equal(get('Alerta enviada'), '');
+  assert.equal(get('Rondas de entrevista'), '');
+  // Idempotent: running it again changes nothing.
+  vm.runInContext('migrateAppsHeaders_(__sheet)', ctx);
+  assert.deepEqual(grid[0], headers);
+});

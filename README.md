@@ -27,7 +27,7 @@ A remote job search means dozens of applications running in parallel, each at a 
 **v2: an open template** (this repo's main product)
 
 - A **Google Sheet with a built-in board**: make a copy, click one menu, done. No token, no deployment, no AI required.
-- An **event log** (`Historial`) behind every metric.
+- An **event log** (`Historial`) behind every metric, plus **interview rounds** tracked as events so a 4-round process and a 1-round process stay comparable in the funnel.
 - An optional **"Copy AI prompt"** button that works with ChatGPT, Gemini or Claude, with no API keys.
 - The **Next.js dashboard in demo mode** as a technical showcase.
 
@@ -65,8 +65,9 @@ All eight decisions, ADR style: [docs/decisions.md](docs/decisions.md).
 
 ## Results
 
-<!-- TODO(Carlos): replace with real numbers from the tracker. Do not estimate. -->
-During my search I tracked **[N] applications**: **[N]** got a reply, **[N]** reached an interview, and **1 ended in an offer I accepted**.
+I used v1 through my own remote job search until I accepted an offer. I did not keep clean enough data to publish a reliable funnel, which is exactly the problem described in [What I'd do differently](#what-id-do-differently): without an event log, the numbers I could reconstruct would be estimates, and this project's rule is not to invent them.
+
+The numbers on the [live demo](https://job-search-copilot-demo.vercel.app) and in the template's sample data are **fictional**, generated to show what the metrics look like with a few dozen applications.
 
 ## What I'd do differently
 
@@ -79,7 +80,7 @@ Other lessons (idempotent side effects, deduplicating on a stable key, removing 
 ## Try it
 
 - **Live demo:** [job-search-copilot-demo.vercel.app](https://job-search-copilot-demo.vercel.app). Fictional companies; your changes stay in your browser.
-- **Template:** [make a copy](SHEET_COPY_LINK) and follow the [setup guide](sheets-template/SETUP_GUIDE.md) ([español](sheets-template/SETUP_GUIDE.es.md)).
+- **Template:** [make a copy](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy) and follow the [setup guide](sheets-template/SETUP_GUIDE.md) ([español](sheets-template/SETUP_GUIDE.es.md)).
 - **AI prompts:** [ai-prompts/](ai-prompts/) (Spanish) and the [generic system prompt](original-copilot/system_prompt.generic.md).
 - **How v1 worked:** [original-copilot/how-it-worked.md](original-copilot/how-it-worked.md).
 

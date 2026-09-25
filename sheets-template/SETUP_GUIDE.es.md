@@ -4,7 +4,7 @@ Tiempo: **5 minutos**. No necesitas saber programar, ni pagar nada, ni usar inte
 
 Lo que vas a tener al final:
 
-- Un tablero tipo kanban (columnas por etapa) para mover tus postulaciones a empleos y becas.
+- Un tablero tipo kanban (columnas por etapa) para mover tus postulaciones de empleo.
 - Métricas: tasa de respuesta, en qué etapa se caen tus procesos, cuánto tardan, qué fuentes funcionan mejor.
 - Aviso de postulaciones "estancadas" (sin movimiento en X días), y correo opcional.
 - Un botón que arma un prompt listo para pegar en ChatGPT, Gemini o Claude (opcional).
@@ -15,10 +15,10 @@ Todo queda **en tu propia cuenta de Google**. Nadie más ve tus datos, ni siquie
 
 ## Paso 1. Haz tu copia
 
-1. Abre este link: **[LINK DE COPIA — lo pone Carlos al publicar]**
+1. Abre este link: **[https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy)**
 2. Google te muestra "¿Quieres hacer una copia?". Pulsa **Hacer una copia**.
 
-![Pantalla "Hacer una copia"](../docs/img/setup-01-copia.png)
+<!-- CAPTURA PENDIENTE: Pantalla "Hacer una copia" → docs/img/setup-01-copia.png -->
 
 Listo: ese Sheet ahora es tuyo. Puedes cambiarle el nombre.
 
@@ -27,7 +27,7 @@ Listo: ese Sheet ahora es tuyo. Puedes cambiarle el nombre.
 1. En tu copia, espera unos segundos a que aparezca el menú **Job Tracker** arriba (junto a "Ayuda"). Si no aparece, recarga la página.
 2. Pulsa **Job Tracker → Configurar por primera vez**.
 
-![Menú Job Tracker](../docs/img/setup-02-menu.png)
+<!-- CAPTURA PENDIENTE: Menú Job Tracker → docs/img/setup-02-menu.png -->
 
 3. Google te pide autorizar el script. Pulsa **Continuar** y elige tu cuenta.
 
@@ -35,7 +35,7 @@ Listo: ese Sheet ahora es tuyo. Puedes cambiarle el nombre.
 
 Vas a ver una pantalla de advertencia. Es normal:
 
-![Google no verificó esta app](../docs/img/setup-03-no-verificada.png)
+<!-- CAPTURA PENDIENTE: Google no verificó esta app → docs/img/setup-03-no-verificada.png -->
 
 - **Por qué aparece:** el script es código que vive dentro de **tu** copia del Sheet y corre con **tu** cuenta. Google muestra este aviso para cualquier script que no haya pasado su proceso de verificación comercial (que es para apps que se publican para millones de personas).
 - **Por qué es seguro:** el script solo pide permiso para: editar **este** Sheet (no tus otros archivos), mostrar la ventana del tablero, programar la revisión diaria y, si tú lo configuras, enviarte un correo **a ti mismo**. No se conecta a ningún servidor externo. Todo el código está a la vista en **Extensiones → Apps Script**.
@@ -46,7 +46,7 @@ Para continuar:
 2. Pulsa **Ir a Job Tracker (no seguro)**.
 3. Revisa los permisos y pulsa **Permitir**.
 
-![Permitir](../docs/img/setup-04-permitir.png)
+<!-- CAPTURA PENDIENTE: Permitir → docs/img/setup-04-permitir.png -->
 
 4. Vuelve a pulsar **Job Tracker → Configurar por primera vez** (la primera vez solo se autoriza). Verás el mensaje **"Listo"**.
 
@@ -62,17 +62,18 @@ Se crearon tres pestañas:
 
 **Job Tracker → Abrir tablero.**
 
-![Tablero](../docs/img/setup-05-tablero.png)
+<!-- CAPTURA PENDIENTE: Tablero → docs/img/setup-05-tablero.png -->
 
-¿Quieres ver cómo se ve lleno? **Job Tracker → Cargar datos de ejemplo** crea 30 postulaciones ficticias. Cuando termines de explorar: **Job Tracker → Borrar datos de ejemplo** (solo borra las de ejemplo, nunca las tuyas).
+¿Quieres ver cómo se ve lleno? **Job Tracker → Cargar datos de ejemplo** crea 33 postulaciones ficticias. Cuando termines de explorar: **Job Tracker → Borrar datos de ejemplo** (solo borra las de ejemplo, nunca las tuyas).
 
 ## Cómo se usa
 
-- **Agregar:** botón **+ Nueva postulación**. Tipo (Empleo o Beca), empresa o institución, cargo o programa y link son lo importante. Si ya existe una con el mismo link o la misma empresa y cargo, te avisa antes de duplicarla.
+- **Agregar:** botón **+ Nueva postulación**. Empresa, cargo y link son lo importante. Si ya existe una con el mismo link o la misma empresa y cargo, te avisa antes de duplicarla.
 - **Mover de etapa:** arrastra la tarjeta a otra columna (en computador) o usa el selector **Mover a…** de la tarjeta (funciona también en el celular).
 - **Detalle:** toca una tarjeta para ver su línea de tiempo, editar datos y **agregar notas** (por ejemplo, qué te preguntaron en una entrevista).
 - **Estancadas:** las tarjetas muestran "X días sin movimiento" en naranja, y la fila también se pinta de naranja en la pestaña Postulaciones.
-- **Filtro:** Todas / Empleo / Beca, búsqueda por texto, y **Ver cerradas** para ver aceptadas, rechazadas y retiradas.
+- **Varias entrevistas:** muchas empresas hacen 2, 3 o más rondas (RR. HH., técnica, final). No hace falta crear etapas nuevas: deja la postulación en **Entrevista** y, en el detalle, pulsa **+ Ronda de entrevista** cada vez que tengas una (puedes escribir antes cómo te fue). La tarjeta muestra "Ronda 2", "Ronda 3"… y cada ronda queda en la línea de tiempo.
+- **Buscar:** por empresa o cargo, y **Ver cerradas** para ver aceptadas, rechazadas y retiradas.
 - **Métricas:** pestaña **Métricas** del tablero. Qué significa cada número: [docs/metrics.md](../docs/metrics.md).
 
 También puedes trabajar directo en la pestaña **Postulaciones**: si cambias la etapa en la celda, queda en el Historial igual que desde el tablero. Si escribes una fila nueva a mano, recibe su ID automáticamente.
@@ -87,7 +88,7 @@ Para probarlo ya: **Job Tracker → Revisar estancadas ahora.**
 
 En el detalle de cualquier postulación, pulsa **Copiar prompt para IA**. Se copia un texto con los datos de esa postulación, su historial y reglas estrictas para que la IA **no invente experiencia**. Pégalo en ChatGPT, Gemini o Claude junto con la vacante y tu CV.
 
-La tarea cambia según la etapa: analizar la vacante (guardada o aplicada), preparar la entrevista (en proceso o entrevista), evaluar la oferta, o sacar aprendizajes si el proceso se cerró.
+La tarea cambia según la etapa: analizar la vacante (guardada o aplicada), preparar la siguiente ronda de entrevista (incluye lo que anotaste de las rondas anteriores), evaluar la oferta, o sacar aprendizajes si el proceso se cerró.
 
 Si el navegador no deja copiar automáticamente, aparece el texto seleccionado: cópialo con Ctrl+C (o mantén presionado en el celular).
 
@@ -102,6 +103,8 @@ La ventana del tablero funciona en computador. Para tenerlo como página en el c
 3. En el engranaje, elige **Aplicación web**.
 4. **Ejecutar como: Yo**. **Quién tiene acceso: Solo yo**.
 5. Pulsa **Implementar** y copia la **URL de la aplicación web**. Ábrela en el celular (con tu misma cuenta de Google) y guárdala en la pantalla de inicio.
+
+Cada persona hace esto en **su propia copia**: la implementación no se copia con el Sheet, y la URL de otra persona no te sirve a ti.
 
 **Por qué es seguro:** con "Solo yo", esa URL solo funciona si has iniciado sesión con tu cuenta. Si alguien más la abre, Google le pide permiso y lo rechaza. No hay contraseñas ni tokens que se puedan filtrar.
 
@@ -120,12 +123,3 @@ La ventana del tablero funciona en computador. Para tenerlo como página en el c
 | No me llegan correos | Revisa el correo en **Config** y la carpeta de spam. Recuerda que solo llega uno por postulación. |
 | Quiero dejar de recibir correos | Borra tu correo de **Config**. |
 
----
-
-## Para Carlos: cómo generar el link de copia
-
-1. Abre el Sheet de la plantilla (sin datos reales, con o sin datos de ejemplo).
-2. **Compartir → Acceso general → Cualquier persona con el enlace → Lector.** Copia el link.
-3. El link se ve así: `https://docs.google.com/spreadsheets/d/ID_DEL_SHEET/edit?usp=sharing`.
-4. Cambia todo lo que va después de `ID_DEL_SHEET/` por `copy`: `https://docs.google.com/spreadsheets/d/ID_DEL_SHEET/copy`.
-5. Ese es el link que compartes. Quien lo abra verá "Hacer una copia" y se lleva el Sheet **con el script incluido**. Tu original no se modifica.

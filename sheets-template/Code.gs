@@ -24,17 +24,21 @@ const SHEETS = {
 };
 
 const APP_HEADERS = [
-  'ID', 'Tipo', 'Empresa/Institución', 'Cargo/Programa', 'Link', 'Fuente',
-  'Fecha aplicación', 'Etapa', 'Fecha último movimiento', 'Versión CV/carta',
+  'ID', 'Empresa', 'Cargo', 'Link', 'Fuente', 'Fecha aplicación', 'Etapa',
+  'Rondas de entrevista', 'Fecha último movimiento', 'Versión de CV',
   'Salario', 'Contacto', 'Próximo paso', 'Notas', 'Alerta enviada',
 ];
 
 // Índices (base 0) de cada columna de Postulaciones.
 const COL = {
-  id: 0, tipo: 1, empresa: 2, cargo: 3, link: 4, fuente: 5,
-  fechaAplicacion: 6, etapa: 7, fechaMovimiento: 8, cv: 9,
+  id: 0, empresa: 1, cargo: 2, link: 3, fuente: 4, fechaAplicacion: 5,
+  etapa: 6, rondas: 7, fechaMovimiento: 8, cv: 9,
   salario: 10, contacto: 11, proximoPaso: 12, notas: 13, alertaEnviada: 14,
 };
+
+// Versiones anteriores de la plantilla: columnas renombradas o eliminadas.
+const RENAMED_HEADERS = { 'Empresa/Institución': 'Empresa', 'Cargo/Programa': 'Cargo', 'Versión CV/carta': 'Versión de CV' };
+const REMOVED_HEADERS = ['Tipo'];
 
 const HISTORY_HEADERS = ['Timestamp', 'ID', 'Etapa anterior', 'Etapa nueva', 'Nota'];
 
@@ -51,7 +55,6 @@ const DEFAULT_STAGES = [
   'Guardada', 'Aplicada', 'En proceso', 'Entrevista', 'Oferta',
   'Aceptada', 'Rechazada', 'Retirada',
 ];
-const TYPES = ['Empleo', 'Beca'];
 const ID_PREFIX = 'JT-';
 const DAILY_HANDLER = 'dailyCheck';
 
@@ -136,6 +139,8 @@ function ensureSheets_() {
     apps.setColumnWidth(COL.empresa + 1, 200);
     apps.setColumnWidth(COL.cargo + 1, 220);
     apps.setColumnWidth(COL.notas + 1, 280);
+  } else {
+    migrateAppsHeaders_(apps);
   }
   applyAppsFormatting_(apps);
 
@@ -153,13 +158,44 @@ function ensureSheets_() {
   ss.setActiveSheet(apps);
 }
 
+/**
+ * Actualiza Sheets creados con una versión anterior de la plantilla:
+ * renombra columnas, borra las que ya no se usan y agrega las nuevas en su lugar.
+ */
+function migrateAppsHeaders_(sheet) {
+  const lastCol = sheet.getLastColumn();
+  if (lastCol === 0) return;
+  let header = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(String);
+  if (header.join('|') === APP_HEADERS.join('|')) return;
+
+  header = header.map(h => RENAMED_HEADERS[h] || h);
+  sheet.getRange(1, 1, 1, header.length).setValues([header]);
+
+  for (let i = header.length - 1; i >= 0; i--) {
+    if (REMOVED_HEADERS.indexOf(header[i]) !== -1) {
+      sheet.deleteColumn(i + 1);
+      header.splice(i, 1);
+    }
+  }
+  APP_HEADERS.forEach((h, i) => {
+    if (header.indexOf(h) !== -1) return;
+    if (i < header.length) sheet.insertColumnBefore(i + 1);
+    else sheet.insertColumnAfter(header.length);
+    sheet.getRange(1, i + 1).setValue(h);
+    header.splice(i, 0, h);
+  });
+  sheet.getRange(1, 1, 1, APP_HEADERS.length)
+    .setFontWeight('bold').setBackground('#1F4E6B').setFontColor('#FFFFFF');
+}
+
 function applyAppsFormatting_(sheet) {
   const stages = getStages_();
   const maxRows = sheet.getMaxRows();
   const n = Math.max(maxRows - 1, 1);
 
-  sheet.getRange(2, COL.tipo + 1, n, 1).setDataValidation(
-    SpreadsheetApp.newDataValidation().requireValueInList(TYPES, true).setAllowInvalid(false).build()
+  sheet.getRange(2, COL.rondas + 1, n, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireNumberBetween(0, 20).setAllowInvalid(false)
+      .setHelpText('Número de rondas de entrevista (0 a 20).').build()
   );
   sheet.getRange(2, COL.etapa + 1, n, 1).setDataValidation(
     SpreadsheetApp.newDataValidation().requireValueInList(stages, true).setAllowInvalid(false).build()
@@ -232,7 +268,6 @@ function getConfig_() {
     email: String(read(CONFIG_ROW.email) || '').trim(),
     language: String(read(CONFIG_ROW.language) || 'es').trim(),
     stages: getStages_(),
-    types: TYPES,
   };
 }
 
@@ -259,13 +294,13 @@ function rowToApp_(r, rowNumber) {
   return {
     row: rowNumber,
     id: String(r[COL.id]),
-    tipo: String(r[COL.tipo] || TYPES[0]),
     empresa: String(r[COL.empresa] || ''),
     cargo: String(r[COL.cargo] || ''),
     link: String(r[COL.link] || ''),
     fuente: String(r[COL.fuente] || ''),
     fechaAplicacion: toIso_(r[COL.fechaAplicacion]),
     etapa: String(r[COL.etapa] || ''),
+    rondas: parseInt(r[COL.rondas], 10) || 0,
     fechaMovimiento: toIso_(r[COL.fechaMovimiento]),
     cv: String(r[COL.cv] || ''),
     salario: String(r[COL.salario] || ''),
@@ -307,7 +342,7 @@ function getBoardData() {
   return {
     apps: apps,
     history: history,
-    config: { staleDays: config.staleDays, stages: config.stages, types: config.types, hasEmail: !!config.email, language: config.language },
+    config: { staleDays: config.staleDays, stages: config.stages, hasEmail: !!config.email, language: config.language },
     metrics: computeMetrics_(apps, history, config.stages, config.staleDays, new Date().toISOString()),
   };
 }
@@ -329,7 +364,7 @@ function createApplication(form) {
   form = form || {};
   const empresa = String(form.empresa || '').trim();
   const cargo = String(form.cargo || '').trim();
-  if (!empresa || !cargo) throw new Error('Empresa/Institución y Cargo/Programa son obligatorios.');
+  if (!empresa || !cargo) throw new Error('Empresa y Cargo son obligatorios.');
 
   return withLock_(() => {
     const apps = readApps_();
@@ -346,13 +381,13 @@ function createApplication(form) {
 
     const row = new Array(APP_HEADERS.length).fill('');
     row[COL.id] = id;
-    row[COL.tipo] = TYPES.indexOf(form.tipo) !== -1 ? form.tipo : TYPES[0];
     row[COL.empresa] = empresa;
     row[COL.cargo] = cargo;
     row[COL.link] = String(form.link || '').trim();
     row[COL.fuente] = String(form.fuente || '').trim();
     row[COL.fechaAplicacion] = fechaAplicacion;
     row[COL.etapa] = etapa;
+    row[COL.rondas] = 0;
     row[COL.fechaMovimiento] = now;
     row[COL.cv] = String(form.cv || '').trim();
     row[COL.salario] = String(form.salario || '').trim();
@@ -395,13 +430,12 @@ function updateNotes(id, notes) {
 
 /** Edita campos de texto (no la etapa: para eso está updateStage). */
 function updateFields(id, fields) {
-  const editable = ['tipo', 'empresa', 'cargo', 'link', 'fuente', 'cv', 'salario', 'contacto', 'proximoPaso', 'notas'];
+  const editable = ['empresa', 'cargo', 'link', 'fuente', 'cv', 'salario', 'contacto', 'proximoPaso', 'notas'];
   return withLock_(() => {
     const found = findRow_(id);
     Object.keys(fields || {}).forEach(key => {
       if (editable.indexOf(key) === -1) return;
-      let value = String(fields[key] == null ? '' : fields[key]).trim();
-      if (key === 'tipo' && TYPES.indexOf(value) === -1) return;
+      const value = String(fields[key] == null ? '' : fields[key]).trim();
       found.sheet.getRange(found.row, COL[key] + 1).setValue(value);
     });
     const values = found.sheet.getRange(found.row, 1, 1, APP_HEADERS.length).getValues()[0];
@@ -418,6 +452,27 @@ function addNote(id, text) {
     const etapa = String(found.values[COL.etapa] || '');
     const event = appendHistory_(id, etapa, etapa, text, new Date());
     return { event: event };
+  });
+}
+
+/**
+ * Registra una ronda más de entrevista (1ª con RR. HH., 2ª técnica, final…).
+ * No cambia la etapa: la etapa "Entrevista" sigue siendo una sola, así el embudo
+ * compara procesos entre sí aunque cada empresa tenga un número distinto de rondas.
+ * Cuenta como movimiento: actualiza la fecha y reinicia la alerta.
+ */
+function addInterviewRound(id, note) {
+  return withLock_(() => {
+    const found = findRow_(id);
+    const round = (parseInt(found.values[COL.rondas], 10) || 0) + 1;
+    const etapa = String(found.values[COL.etapa] || '');
+    const now = new Date();
+    found.sheet.getRange(found.row, COL.rondas + 1).setValue(round);
+    found.sheet.getRange(found.row, COL.fechaMovimiento + 1).setValue(now);
+    found.sheet.getRange(found.row, COL.alertaEnviada + 1).setValue('');
+    const text = 'Ronda ' + round + ' de entrevista' + (note && String(note).trim() ? ': ' + String(note).trim() : '');
+    const event = appendHistory_(id, etapa, etapa, text, now);
+    return { round: round, event: event };
   });
 }
 
@@ -531,7 +586,6 @@ function onEdit(e) {
       apps.push({ id: id });
       const etapa = r[COL.etapa] || stageRoles_(getStages_()).applied;
       sheet.getRange(rowNumber, COL.id + 1).setValue(id);
-      if (!r[COL.tipo]) sheet.getRange(rowNumber, COL.tipo + 1).setValue(TYPES[0]);
       if (!r[COL.etapa]) sheet.getRange(rowNumber, COL.etapa + 1).setValue(etapa);
       if (!r[COL.fechaAplicacion]) sheet.getRange(rowNumber, COL.fechaAplicacion + 1).setValue(now);
       sheet.getRange(rowNumber, COL.fechaMovimiento + 1).setValue(now);

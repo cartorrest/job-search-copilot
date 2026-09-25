@@ -50,6 +50,11 @@ Sent applications grouped by the Monday (UTC) of their application date, last 12
 ### Response rate by source
 Same definition as the response rate, grouped by the `Source` field.
 
+### Interview rounds
+Companies run anywhere from one to four or more interview rounds. Instead of adding a stage per round (which would make funnels incomparable across companies), the template keeps a single interview stage and counts rounds in a `Rondas de entrevista` column. Each round is logged in `Historial` as a note (`previous = new`), so it never splits a stage stint or changes the funnel. A round counts as movement: it updates the last-movement date and resets the stall alert.
+
+**Average rounds** = mean of `Rondas de entrevista` over applications with at least one round.
+
 ### Stalled
 Applications not in a closed stage whose last movement is at least **N days** old (`N` is set in `Config`, default 7). In the Sheet this is a live conditional format (`TODAY()` based), so it does not depend on the daily trigger. The daily trigger only sends the optional email, **once per application** until its stage changes.
 

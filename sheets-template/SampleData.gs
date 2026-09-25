@@ -12,13 +12,16 @@ var DEMO_COMPANIES = [
   'Monsters Inc', 'Aperture Science', 'Black Mesa', 'Nakatomi Trading', 'Gringotts Fintech',
   'Oceanic Travel', 'Sirius Cybernetics', 'Blue Sun Retail', 'Buy n Large', 'Prestige Worldwide',
 ];
-var DEMO_SCHOLARSHIPS = ['Fundación Ejemplo', 'Programa Beca Ficticia', 'Instituto Imaginario', 'Red Becas Demo'];
 var DEMO_ROLES = [
   'Data Analyst', 'BI Analyst', 'Project Coordinator', 'Operations Analyst', 'Customer Success Specialist',
   'Reporting Analyst', 'Junior Data Engineer', 'Product Analyst', 'Administrative Assistant', 'Virtual Assistant',
 ];
-var DEMO_PROGRAMS = ['Maestría en Analítica (beca parcial)', 'Bootcamp de Datos (beca completa)', 'Curso de Inglés Profesional'];
 var DEMO_SOURCES = ['LinkedIn', 'LinkedIn', 'Indeed', 'Referido', 'Página de la empresa', 'Workana', 'Get on Board'];
+var DEMO_ROUND_NOTES = [
+  'Filtro con RR. HH.: experiencia, disponibilidad y expectativa salarial. (ficticio)',
+  'Entrevista técnica: caso práctico con SQL y un dashboard. (ficticio)',
+  'Entrevista final con el líder del equipo: cultura y proyectos. (ficticio)',
+];
 
 /**
  * Cada escenario es la secuencia de etapas (por rol) y cuántos días pasa en cada una.
@@ -103,10 +106,10 @@ function buildSampleData_(stages, today) {
   const events = [];
   scenarios.forEach((path, idx) => {
     const id = DEMO_PREFIX + String(idx + 1).padStart(2, '0');
-    const isScholarship = idx % 9 === 4;
-    const empresa = isScholarship ? pick(DEMO_SCHOLARSHIPS) : DEMO_COMPANIES[idx % DEMO_COMPANIES.length];
-    const cargo = isScholarship ? pick(DEMO_PROGRAMS) : pick(DEMO_ROLES);
-    const fuente = isScholarship ? 'Página de la institución' : pick(DEMO_SOURCES);
+    const empresa = DEMO_COMPANIES[idx % DEMO_COMPANIES.length];
+    const cargo = pick(DEMO_ROLES);
+    const fuente = pick(DEMO_SOURCES);
+    let rounds = 0;
 
     // Cada etapa dura entre 2 y 12 días. Los procesos cerrados terminan en cualquier
     // momento de las últimas ~10 semanas; los abiertos tuvieron su último movimiento
@@ -122,23 +125,31 @@ function buildSampleData_(stages, today) {
       const stage = roleToStage[role];
       t += gaps[step];
       events.push([new Date(t), id, prev, stage, step === 0 ? 'Postulación creada (dato de ejemplo)' : '']);
-      if (role === 'i') events.push([new Date(Math.min(t + DAY_MS, today.getTime() - 60 * 1000)), id, stage, stage, 'Entrevista con RR. HH.: preguntaron por experiencia con reportes y disponibilidad. (ficticio)']);
+      if (role === 'i') {
+        // 1 a 3 rondas, cada 12 h (el tramo más corto entre etapas es de 2 días).
+        rounds = 1 + Math.floor(rand() * 3);
+        for (let k = 0; k < rounds; k++) {
+          const when = Math.min(t + (k + 1) * DAY_MS / 2, today.getTime() - (rounds - k) * 60 * 1000);
+          events.push([new Date(when), id, stage, stage, 'Ronda ' + (k + 1) + ' de entrevista: ' + DEMO_ROUND_NOTES[k]]);
+        }
+      }
       prev = stage;
     });
 
     const lastStage = roleToStage[path[path.length - 1]];
     const row = new Array(APP_HEADERS.length).fill('');
     row[COL.id] = id;
-    row[COL.tipo] = isScholarship ? 'Beca' : 'Empleo';
     row[COL.empresa] = empresa;
     row[COL.cargo] = cargo;
     row[COL.link] = 'https://example.com/vacantes/' + id.toLowerCase();
     row[COL.fuente] = fuente;
     row[COL.fechaAplicacion] = start;
     row[COL.etapa] = lastStage;
-    row[COL.fechaMovimiento] = new Date(t);
-    row[COL.cv] = isScholarship ? 'Carta de motivación v1' : pick(['CV general v2', 'CV datos v1', 'CV operaciones v1']);
-    row[COL.salario] = isScholarship ? '' : pick(['', 'USD 1.500-2.000', 'USD 2.000-2.500', 'A convenir']);
+    row[COL.rondas] = rounds;
+    // Las rondas también cuentan como movimiento.
+    row[COL.fechaMovimiento] = new Date(Math.max.apply(null, events.filter(e => e[1] === id).map(e => e[0].getTime())));
+    row[COL.cv] = pick(['CV general v2', 'CV datos v1', 'CV operaciones v1']);
+    row[COL.salario] = pick(['', 'USD 1.500-2.000', 'USD 2.000-2.500', 'A convenir']);
     row[COL.contacto] = rand() < 0.3 ? 'Reclutador ficticio' : '';
     row[COL.proximoPaso] = lastStage === roleToStage.i ? 'Enviar agradecimiento y preparar prueba técnica' : lastStage === roleToStage.a ? 'Hacer seguimiento si no responden' : '';
     row[COL.notas] = '[DATO DE EJEMPLO] Empresa y vacante ficticias.';

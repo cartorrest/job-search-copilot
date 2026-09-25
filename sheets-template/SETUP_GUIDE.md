@@ -4,7 +4,7 @@
 
 ## 1. Make your copy
 
-Open the copy link **[COPY LINK — added at publish time]** and click **Make a copy**.
+Open the copy link **[https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy)** and click **Make a copy**.
 
 ## 2. First-time setup
 
@@ -17,10 +17,11 @@ This creates three sheets: **Postulaciones** (one row per application), **Histor
 
 ## 3. Open the board
 
-**Job Tracker → Abrir tablero.** Use **Cargar datos de ejemplo** to load 30 fictional applications, and **Borrar datos de ejemplo** to remove only those.
+**Job Tracker → Abrir tablero.** Use **Cargar datos de ejemplo** to load 33 fictional applications, and **Borrar datos de ejemplo** to remove only those.
 
 - Drag cards between columns, or use the **Mover a…** selector (works on phones).
 - Click a card for its timeline, editable fields and dated notes.
+- **Multiple interview rounds:** keep the application in the single *Entrevista* stage and click **+ Ronda de entrevista** for each round (HR screen, technical, final…). Cards show "Ronda 2", "Ronda 3", and each round is logged in the timeline. The funnel stays comparable across companies that run a different number of rounds.
 - **Métricas** tab: response rate, funnel and biggest drop-off, average days per stage, applications per week, reply rate by source. Definitions: [docs/metrics.md](../docs/metrics.md).
 - **Copiar prompt para IA** builds a prompt for any chatbot with the application's data, its timeline and strict "do not invent experience" rules.
 - Manual edits in the Sheet are logged too (`onEdit`), and new rows typed by hand get an ID.
@@ -28,10 +29,7 @@ This creates three sheets: **Postulaciones** (one row per application), **Histor
 ## Optional
 
 - **Email alerts:** put your address in **Config**. A daily trigger emails you once per application that has been stalled for N+ days; the flag resets on every stage change.
-- **Phone:** Extensions → Apps Script → Deploy → New deployment → Web app, **Execute as: Me**, **Who has access: Only myself**. Only you, signed in, can open that URL.
+- **Phone:** Extensions → Apps Script → Deploy → New deployment → Web app, **Execute as: Me**, **Who has access: Only myself**. Only you, signed in, can open that URL. Deployments are not copied with the Sheet, so each person deploys their own.
 - **Stages:** edit the list in **Config** (keep the order: 1st = saved, 2nd = applied, last three = accepted, rejected, withdrawn), then rerun first-time setup.
 - **Translate:** all UI strings live in the `LABELS` object in `Scripts.html`.
 
-## Publishing a copy link (maintainer)
-
-Share the template as "Anyone with the link: Viewer", then replace `/edit?...` in the URL with `/copy`.

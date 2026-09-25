@@ -1,4 +1,4 @@
-# Prompt: analizar una vacante (o beca) frente a tu CV
+# Prompt: analizar una vacante frente a tu CV
 
 **Para qué sirve:** decidir rápido si vale la pena aplicar y con qué versión de tu CV.
 **Funciona en:** ChatGPT, Gemini, Claude, Copilot o cualquier chatbot. No necesitas cuenta de pago.
@@ -53,7 +53,3 @@ VACANTE:
 MI CV:
 [PEGA AQUÍ TU CV O ADJÚNTALO]
 ```
-
----
-
-**Si es una beca:** cambia "vacante" por "convocatoria", "CV" por "CV y carta de motivación", y en MI CONTEXTO describe el programa que buscas (maestría, bootcamp, curso).

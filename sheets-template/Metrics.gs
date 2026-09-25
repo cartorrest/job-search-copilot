@@ -144,6 +144,14 @@ function computeMetrics_(apps, history, stages, staleDays, nowIso) {
     if (idx >= 0 && idx < 12) weeks[idx].count++;
   });
 
+  // ---- Rondas de entrevista -------------------------------------------
+  var withRounds = apps.filter(function (a) { return (a.rondas || 0) > 0; });
+  var interviewRounds = {
+    apps: withRounds.length,
+    avg: withRounds.length ? withRounds.reduce(function (s, a) { return s + a.rondas; }, 0) / withRounds.length : null,
+    max: withRounds.reduce(function (mx, a) { return Math.max(mx, a.rondas); }, 0),
+  };
+
   // ---- Estancadas -----------------------------------------------------
   var staleApps = [];
   var active = 0;
@@ -168,6 +176,7 @@ function computeMetrics_(apps, history, stages, staleDays, nowIso) {
     avgDaysByStage: avgDaysByStage,
     weekly: weeks,
     bySource: sources,
+    interviewRounds: interviewRounds,
     staleApps: staleApps,
     staleDays: staleDays,
   };
