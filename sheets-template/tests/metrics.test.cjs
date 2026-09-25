@@ -141,3 +141,12 @@ test('migration: a sheet from the first template version gets the new columns wi
   vm.runInContext('migrateAppsHeaders_(__sheet)', ctx);
   assert.deepEqual(grid[0], headers);
 });
+
+test('rounds are read correctly even if the cell got a date format', () => {
+  assert.equal(run(`readRounds_(3)`), 3);
+  assert.equal(run(`readRounds_('2')`), 2);
+  assert.equal(run(`readRounds_('')`), 0);
+  // What Sheets returns for the number 3 in a date-formatted cell.
+  assert.equal(run(`readRounds_(new Date(1900, 0, 2))`), 3);
+  assert.equal(run(`readRounds_(new Date(2026, 8, 24))`), 0);
+});

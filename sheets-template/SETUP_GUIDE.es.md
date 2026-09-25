@@ -15,40 +15,47 @@ Todo queda **en tu propia cuenta de Google**. Nadie más ve tus datos, ni siquie
 
 ## Paso 1. Haz tu copia
 
-1. Abre este link: **[https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy)**
-2. Google te muestra "¿Quieres hacer una copia?". Pulsa **Hacer una copia**.
+1. Abre este link: **[Hacer mi copia de Job Tracker](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy)**
+2. Google avisa que también se copia la parte de Apps Script (es el código del tablero). Pulsa **Crear una copia**.
 
-<!-- CAPTURA PENDIENTE: Pantalla "Hacer una copia" → docs/img/setup-01-copia.png -->
+<img src="../docs/img/setup-01-copia.png" alt="Pantalla Copiar documento" width="520">
 
 Listo: ese Sheet ahora es tuyo. Puedes cambiarle el nombre.
 
 ## Paso 2. Configura por primera vez
 
-1. En tu copia, espera unos segundos a que aparezca el menú **Job Tracker** arriba (junto a "Ayuda"). Si no aparece, recarga la página.
+1. En tu copia, espera unos segundos a que aparezca el menú **Job Tracker** arriba, junto a "Ayuda". **Si no aparece, recarga la página** y espera 10 segundos.
 2. Pulsa **Job Tracker → Configurar por primera vez**.
 
-<!-- CAPTURA PENDIENTE: Menú Job Tracker → docs/img/setup-02-menu.png -->
+<img src="../docs/img/setup-02-menu.png" alt="Menú Job Tracker" width="520">
 
-3. Google te pide autorizar el script. Pulsa **Continuar** y elige tu cuenta.
+3. Sale **"Se requiere autorización"**. Pulsa **Aceptar** y elige tu cuenta de Google.
+
+<img src="../docs/img/setup-03-autorizacion.png" alt="Se requiere autorización" width="520">
 
 ### "Google no verificó esta app": qué es y por qué puedes continuar
 
-Vas a ver una pantalla de advertencia. Es normal:
+Vas a ver esta pantalla de advertencia. Es normal. En tu caso aparecerá **tu propio correo**, porque la copia es tuya:
 
-<!-- CAPTURA PENDIENTE: Google no verificó esta app → docs/img/setup-03-no-verificada.png -->
+<img src="../docs/img/setup-04-no-verificada.png" alt="Google no verificó esta app" width="520">
 
-- **Por qué aparece:** el script es código que vive dentro de **tu** copia del Sheet y corre con **tu** cuenta. Google muestra este aviso para cualquier script que no haya pasado su proceso de verificación comercial (que es para apps que se publican para millones de personas).
-- **Por qué es seguro:** el script solo pide permiso para: editar **este** Sheet (no tus otros archivos), mostrar la ventana del tablero, programar la revisión diaria y, si tú lo configuras, enviarte un correo **a ti mismo**. No se conecta a ningún servidor externo. Todo el código está a la vista en **Extensiones → Apps Script**.
+- **Por qué aparece:** el script es código que vive dentro de **tu** copia del Sheet y corre con **tu** cuenta. Google muestra este aviso para cualquier script que no haya pasado su proceso de verificación comercial (pensado para apps que se publican para millones de personas).
+- **Por qué es seguro:** el script solo pide permiso para editar **este** Sheet (no tus otros archivos), mostrar la ventana del tablero, programar la revisión diaria y, si tú lo configuras, enviarte un correo **a ti mismo**. No se conecta a ningún servidor externo. Todo el código está a la vista en **Extensiones → Apps Script**.
 
 Para continuar:
 
-1. Pulsa **Configuración avanzada** (o "Advanced").
-2. Pulsa **Ir a Job Tracker (no seguro)**.
-3. Revisa los permisos y pulsa **Permitir**.
+4. Pulsa **Configuración avanzada** y luego **Ir a Job Tracker (no seguro)**.
+5. En la pantalla de permisos marca **Seleccionar todos**:
 
-<!-- CAPTURA PENDIENTE: Permitir → docs/img/setup-04-permitir.png -->
+<img src="../docs/img/setup-05-permisos.png" alt="Permisos que pide Job Tracker" width="520">
 
-4. Vuelve a pulsar **Job Tracker → Configurar por primera vez** (la primera vez solo se autoriza). Verás el mensaje **"Listo"**.
+6. Baja hasta el final y pulsa **Continuar**:
+
+<img src="../docs/img/setup-06-continuar.png" alt="Botón Continuar" width="520">
+
+7. Verás el mensaje **"Listo"**. Si no aparece, pulsa otra vez **Job Tracker → Configurar por primera vez** (a veces la primera vez solo se autoriza).
+
+<img src="../docs/img/setup-07-listo.png" alt="Mensaje Listo" width="520">
 
 Se crearon tres pestañas:
 
@@ -62,9 +69,9 @@ Se crearon tres pestañas:
 
 **Job Tracker → Abrir tablero.**
 
-<!-- CAPTURA PENDIENTE: Tablero → docs/img/setup-05-tablero.png -->
+<img src="../docs/img/setup-08-tablero.png" alt="Tablero de Job Tracker" width="520">
 
-¿Quieres ver cómo se ve lleno? **Job Tracker → Cargar datos de ejemplo** crea 33 postulaciones ficticias. Cuando termines de explorar: **Job Tracker → Borrar datos de ejemplo** (solo borra las de ejemplo, nunca las tuyas).
+La copia trae **postulaciones de ejemplo** (empresas ficticias) para que veas cómo funciona. Cuando quieras empezar con las tuyas: **Job Tracker → Borrar datos de ejemplo** (solo borra las de ejemplo, nunca las tuyas). Si luego quieres volver a verlas: **Cargar datos de ejemplo**.
 
 ## Cómo se usa
 

@@ -203,6 +203,9 @@ function applyAppsFormatting_(sheet) {
   [COL.fechaAplicacion, COL.fechaMovimiento, COL.alertaEnviada].forEach(c => {
     sheet.getRange(2, c + 1, n, 1).setNumberFormat('yyyy-mm-dd');
   });
+  // Al insertar la columna de rondas en un Sheet viejo, Google le copia el formato de
+  // fecha de la columna vecina y "3" se ve como una fecha. Forzamos número entero.
+  sheet.getRange(2, COL.rondas + 1, n, 1).setNumberFormat('0');
 
   // Filas estancadas en naranja. Se calcula en vivo con TODAY(), no depende del trigger.
   const closed = stageRoles_(stages).closed;
@@ -300,7 +303,7 @@ function rowToApp_(r, rowNumber) {
     fuente: String(r[COL.fuente] || ''),
     fechaAplicacion: toIso_(r[COL.fechaAplicacion]),
     etapa: String(r[COL.etapa] || ''),
-    rondas: parseInt(r[COL.rondas], 10) || 0,
+    rondas: readRounds_(r[COL.rondas]),
     fechaMovimiento: toIso_(r[COL.fechaMovimiento]),
     cv: String(r[COL.cv] || ''),
     salario: String(r[COL.salario] || ''),
@@ -317,6 +320,19 @@ function readHistory_() {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, HISTORY_HEADERS.length).getValues()
     .filter(r => r[1])
     .map(r => ({ ts: toIso_(r[0]), id: String(r[1]), prev: String(r[2] || ''), next: String(r[3] || ''), nota: String(r[4] || '') }));
+}
+
+/**
+ * Número de rondas guardado en la celda. Si la celda quedó con formato de fecha,
+ * Sheets devuelve un Date (3 → 2-ene-1900): lo convertimos de vuelta a número.
+ */
+function readRounds_(value) {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    const serial = Math.round((value.getTime() - new Date(1899, 11, 30).getTime()) / (24 * 60 * 60 * 1000));
+    return serial > 0 && serial < 100 ? serial : 0;
+  }
+  const n = parseInt(value, 10);
+  return isNaN(n) || n < 0 ? 0 : n;
 }
 
 // google.script.run no puede transportar objetos Date: todo viaja como texto ISO.
@@ -464,7 +480,7 @@ function addNote(id, text) {
 function addInterviewRound(id, note) {
   return withLock_(() => {
     const found = findRow_(id);
-    const round = (parseInt(found.values[COL.rondas], 10) || 0) + 1;
+    const round = readRounds_(found.values[COL.rondas]) + 1;
     const etapa = String(found.values[COL.etapa] || '');
     const now = new Date();
     found.sheet.getRange(found.row, COL.rondas + 1).setValue(round);
