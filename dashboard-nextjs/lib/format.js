@@ -1,20 +1,19 @@
 // lib/format.js
 //
-// El Sheet lo llenas a mano, asi que los formatos varian: "Match %"
-// a veces es un decimal tipo 0.4 (cuando la celda esta formateada como
-// porcentaje en Sheets), a veces un numero plano tipo 55, y a veces
-// texto tipo "65-70%". Estas funciones normalizan eso para que el
-// dashboard no se rompa ni muestre numeros raros.
+// The Sheet is filled by hand, so formats vary: "Match %" can be a decimal
+// like 0.4 (cell formatted as a percentage), a plain number like 55, or
+// text like "65-70%". These helpers normalize it so the dashboard never
+// breaks or shows odd numbers.
 
 export function parseMatchPercent(value) {
   if (value === '' || value === null || value === undefined) return null;
 
   if (typeof value === 'number') {
-    // Si viene como decimal (celda formateada como % en Sheets), 0.4 -> 40
+    // Decimal from a percentage-formatted cell: 0.4 -> 40
     return value <= 1 ? Math.round(value * 100) : Math.round(value);
   }
 
-  // Es texto: sacamos el primer numero que encontremos (ej: "65-70%" -> 65)
+  // Text: take the first number found (e.g. "65-70%" -> 65)
   const match = String(value).match(/\d+(\.\d+)?/);
   return match ? Math.round(parseFloat(match[0])) : null;
 }

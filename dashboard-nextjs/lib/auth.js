@@ -1,26 +1,22 @@
 // lib/auth.js
 //
-// Proteccion de acceso simple: una sola contraseña, sin usuarios ni base
-// de datos. Cuando alguien mete la contraseña correcta, le damos una
-// cookie firmada que dura 30 dias. La cookie es "firmada" (no solo un
-// texto plano) para que nadie pueda inventarse una cookie valida sin
-// conocer el SESSION_SECRET.
+// Simple access control: one password, no users, no database. The right
+// password gets an HMAC-signed cookie valid for 30 days, so nobody can
+// forge a valid cookie without SESSION_SECRET.
 //
-// Usamos la Web Crypto API (crypto.subtle) en vez del modulo 'crypto' de
-// Node porque este archivo lo usa el middleware, que corre en el "Edge
-// Runtime" de Vercel -- un entorno mas limitado que no tiene el modulo
-// 'crypto' de Node, pero si tiene Web Crypto (es lo mismo que usan los
-// navegadores).
+// Uses the Web Crypto API (crypto.subtle) instead of Node's 'crypto'
+// module because the middleware runs on the Edge Runtime, which only has
+// Web Crypto.
 
-const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
+const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 async function getKey() {
-  // Sin SESSION_SECRET no hay forma segura de firmar: fallamos cerrado
-  // (nadie entra) en vez de usar una clave por defecto que cualquiera
-  // podria leer en este repo publico.
+  // Without SESSION_SECRET there is no safe way to sign: fail closed
+  // (nobody gets in) instead of falling back to a default key that anyone
+  // could read in this public repo.
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 16) {
-    throw new Error('SESSION_SECRET falta o es muy corto (minimo 16 caracteres).');
+    throw new Error('SESSION_SECRET is missing or too short (16+ characters).');
   }
   const encoder = new TextEncoder();
   return crypto.subtle.importKey(
@@ -67,7 +63,7 @@ async function verifySessionToken(token) {
   const expectedSignature = await crypto.subtle.sign('HMAC', key, encoder.encode(expiresStr));
   const expectedHex = toHex(expectedSignature);
 
-  // Comparacion en tiempo constante para evitar timing attacks.
+  // Constant-time comparison to avoid timing attacks.
   if (expectedHex.length !== signatureHex.length) return false;
   let diff = 0;
   for (let i = 0; i < expectedHex.length; i++) {

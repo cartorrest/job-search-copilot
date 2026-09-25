@@ -2,6 +2,8 @@
 
 Esta es la versión que usé en mi propia búsqueda: en vez de llenar el Sheet a mano, le escribía a Claude *"apliqué a Data Analyst en Acme"* y él registraba la postulación en el Sheet, analizaba vacantes, adaptaba mi CV sin inventar nada y me preparaba para cada entrevista.
 
+> **Importante:** esta es la **versión 1**, tal como la usé. Registra la etapa actual de cada postulación pero **no guarda historial**, así que no tiene las métricas, rondas de entrevista ni alertas mejoradas de la [plantilla nueva](../sheets-template/). Combinar las dos cosas (hablarle a Claude y que todo quede en la plantilla nueva) es una idea que dejé documentada pero **no construida**, porque no la he podido probar: ver [docs/ideas.md](../docs/ideas.md#v2--claude-the-chat-workflow-on-top-of-the-new-template).
+
 > **¿Es para ti?** Si solo quieres organizar tus postulaciones, usa la [plantilla de Sheets](../sheets-template/SETUP_GUIDE.es.md): es más fácil y no necesita IA. Este modo es para quien ya usa Claude con plan de pago y se siente cómodo siguiendo pasos técnicos (unos 30 minutos, sin programar).
 
 ## Qué hay en esta carpeta

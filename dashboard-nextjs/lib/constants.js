@@ -1,8 +1,7 @@
 // lib/constants.js
 
-// Orden completo de etapas. Las metricas dependen de la posicion:
-// 1a = guardada, 2a = aplicada, 3 ultimas = cierres (contratado,
-// rechazado, retirado). Ver docs/metrics.md.
+// Full stage order. Metrics depend on position: 1st = saved, 2nd = applied,
+// last three = closed (hired, rejected, withdrawn). See docs/metrics.md.
 export const STAGES = [
   'Saved',
   'Applied',
@@ -14,20 +13,19 @@ export const STAGES = [
   'Withdrawn',
 ];
 
-// Opciones del desplegable de cada tarjeta.
+// Options in each card's status dropdown.
 export const STATUS_FLOW = STAGES;
 
-// Las columnas del tablero (Kanban).
+// Kanban board columns.
 export const BOARD_COLUMNS = ['Saved', 'Applied', 'Screening', 'Interview', 'Offer'];
 
-// Estados que se ocultan por defecto y solo se ven con "Ver cerradas".
+// Hidden by default; shown with "Show closed".
 export const CLOSED_STATUSES = ['Hired', 'Rejected', 'Withdrawn'];
 
-// Un solo lugar con el color de cada estado. Las clases estan escritas
-// COMPLETAS (no armadas con ${status}) porque Tailwind necesita verlas
-// tal cual, como texto literal, para generarlas -- si las armaramos
-// dinamicamente con un template string, Tailwind nunca las detectaria
-// y la tarjeta se veria sin color.
+// One place for each status color. Class names are written out in FULL
+// (not built with ${status}) because Tailwind only generates classes it
+// can see as literal text; dynamic template strings would leave cards
+// without color.
 export const STATUS_STYLES = {
   Saved: {
     border: 'border-l-status-saved',
@@ -71,11 +69,8 @@ export const STATUS_STYLES = {
   },
 };
 
-// Mismo criterio que usa el trigger de alertas por correo en Apps Script.
+// Same threshold as the template's default stall alert.
 export const STALE_DAYS_THRESHOLD = 7;
 
-// Mensaje generico para cuando una columna del tablero no tiene ninguna
-// vacante. Un solo lugar decide el texto, asi que se ve igual sin
-// importar cual columna este vacia (Applied, Screening, Interview,
-// Offer, o las de cerradas cuando "Ver cerradas" esta activo).
+// Shown in any empty column.
 export const EMPTY_COLUMN_MESSAGE = 'Nothing here yet';

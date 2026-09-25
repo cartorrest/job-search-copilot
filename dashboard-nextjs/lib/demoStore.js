@@ -1,8 +1,8 @@
 // lib/demoStore.js
 //
-// En modo demo no hay servidor ni Sheet: los datos viven en localStorage
-// del navegador de cada visitante. Si localStorage no esta disponible
-// (modo privado, bloqueado), la demo sigue funcionando solo en memoria.
+// Demo mode has no server and no Sheet: data lives in each visitor's
+// localStorage. If localStorage is unavailable (private mode, blocked),
+// the demo keeps working in memory only.
 
 import { buildDemoData } from './demoData.js';
 
@@ -16,7 +16,7 @@ export function loadDemo() {
       if (Array.isArray(parsed.jobs) && Array.isArray(parsed.history)) return parsed;
     }
   } catch {
-    // sin localStorage: seguimos en memoria
+    // no localStorage: stay in memory
   }
   return buildDemoData();
 }
@@ -25,7 +25,7 @@ export function saveDemo(data) {
   try {
     window.localStorage.setItem(KEY, JSON.stringify(data));
   } catch {
-    // ignorado a proposito
+    // intentionally ignored
   }
 }
 
@@ -33,7 +33,7 @@ export function resetDemo() {
   try {
     window.localStorage.removeItem(KEY);
   } catch {
-    // ignorado a proposito
+    // intentionally ignored
   }
   return buildDemoData();
 }

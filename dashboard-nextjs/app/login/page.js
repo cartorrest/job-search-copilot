@@ -26,7 +26,7 @@ export default function LoginPage() {
       router.push('/');
       router.refresh();
     } else {
-      setError('Contraseña incorrecta.');
+      setError('Wrong password.');
     }
   }
 
@@ -36,11 +36,11 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white border border-blueprint-100 rounded-xl shadow-sm p-8 w-full max-w-sm"
       >
-        <h1 className="font-display font-semibold text-xl text-ink mb-1">Job tracker</h1>
-        <p className="text-sm text-ink/60 mb-6">Acceso privado</p>
+        <h1 className="font-display font-semibold text-xl text-ink mb-1">Job Search Copilot</h1>
+        <p className="text-sm text-ink/60 mb-6">Private access</p>
 
         <label className="block text-sm font-medium text-ink mb-1" htmlFor="password">
-          Contraseña
+          Password
         </label>
         <input
           id="password"
@@ -58,7 +58,7 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full bg-blueprint-500 hover:bg-blueprint-700 transition-colors text-white font-medium rounded-lg py-2 disabled:opacity-60"
         >
-          {loading ? 'Entrando...' : 'Entrar'}
+          {loading ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
     </div>

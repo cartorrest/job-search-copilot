@@ -1,12 +1,10 @@
 // app/api/jobs/[jobId]/route.js
 //
-// [jobId] entre corchetes es una "ruta dinamica" de Next.js: captura
-// cualquier valor en esa posicion de la URL. Si el navegador llama a
-// PATCH /api/jobs/JOB-004, Next.js nos da jobId = "JOB-004" automatico.
+// [jobId] is a Next.js dynamic segment: PATCH /api/jobs/JOB-004 gives
+// jobId = "JOB-004".
 //
-// Nota Next.js 15: 'params' ahora es una Promise (antes era un objeto
-// normal en Next 14). Hay que hacerle 'await' antes de leer jobId, si no
-// jobId queda undefined y esta ruta fallaria en silencio.
+// Next.js 15 note: 'params' is now a Promise (it was a plain object in
+// Next 14). Without 'await', jobId is undefined and the route fails silently.
 
 import { NextResponse } from 'next/server';
 import { updateJob } from '@/lib/appsScript';
@@ -19,9 +17,9 @@ export async function PATCH(request, { params }) {
     const result = await updateJob(jobId, fields);
     return NextResponse.json(result);
   } catch (error) {
-    console.error(`[api/jobs/${jobId}] Error actualizando:`, error);
+    console.error(`[api/jobs/${jobId}] Error updating:`, error);
     return NextResponse.json(
-      { error: 'No se pudo actualizar la vacante. Intenta de nuevo.' },
+      { error: 'Could not update the application. Please try again.' },
       { status: 502 }
     );
   }

@@ -1,9 +1,8 @@
 // app/api/jobs/route.js
 //
-// Esta es la ruta que el navegador llama para traer todas las vacantes.
-// Internamente llama a listJobs() de lib/appsScript.js, que es quien
-// realmente sabe el token y habla con Google. El navegador nunca ve
-// nada de eso, solo recibe el JSON final.
+// The browser calls this route to load every application. It delegates to
+// listJobs() in lib/appsScript.js, the only code that knows the token and
+// talks to Google. The browser only ever sees the final JSON.
 
 import { NextResponse } from 'next/server';
 import { listJobs } from '@/lib/appsScript';
@@ -13,9 +12,9 @@ export async function GET() {
     const jobs = await listJobs();
     return NextResponse.json({ jobs });
   } catch (error) {
-    console.error('[api/jobs] Error trayendo vacantes:', error);
+    console.error('[api/jobs] Error loading applications:', error);
     return NextResponse.json(
-      { error: 'No se pudo conectar con el Tracker. Revisa la configuracion.' },
+      { error: 'Could not reach the tracker. Check the configuration.' },
       { status: 502 }
     );
   }

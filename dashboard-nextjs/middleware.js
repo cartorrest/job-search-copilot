@@ -1,13 +1,9 @@
 // middleware.js
 //
-// Next.js ejecuta este archivo automaticamente antes de servir CUALQUIER
-// pagina o ruta de API (siempre que el archivo se llame exactamente
-// "middleware.js" y viva en la raiz del proyecto -- no hace falta
-// importarlo en ningun lado).
+// Runs before every page and API route.
 //
-// Logica: si la cookie de sesion no existe o no es valida, mandamos al
-// usuario a /login. Dejamos pasar sin chequeo: la propia pagina de login,
-// la ruta que valida la contraseña, y los archivos estaticos de Next.
+// Private mode: without a valid session cookie, redirect to /login. The
+// login page, the password route and Next's static files are always open.
 
 import { NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME, isValidSessionToken } from '@/lib/auth';
@@ -15,8 +11,8 @@ import { SESSION_COOKIE_NAME, isValidSessionToken } from '@/lib/auth';
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Modo demo: sin login, y las rutas que hablan con Apps Script quedan
-  // apagadas (la demo nunca toca un Sheet real).
+  // Demo mode: no login, and the routes that talk to Apps Script are
+  // disabled (the demo never touches a real Sheet).
   if (process.env.DEMO_MODE === 'true') {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'disabled_in_demo' }, { status: 404 });
@@ -49,6 +45,6 @@ export async function middleware(request) {
 }
 
 export const config = {
-  // Corre en todo excepto archivos estaticos de Next (_next/static, etc.)
+  // Everything except Next's static assets (_next/static, etc.)
   matcher: ['/((?!_next/static|_next/image).*)'],
 };

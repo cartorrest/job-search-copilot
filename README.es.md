@@ -53,7 +53,7 @@ Si usas ChatGPT, Gemini o Claude, estos prompts te ayudan sin inventar nada:
 
 ## Modo avanzado: conectado a Claude
 
-Durante mi búsqueda no llenaba el Sheet a mano: le decía a Claude *"apliqué a X en Y"* y él lo registraba, además de analizar vacantes y prepararme para las entrevistas. Si usas Claude y quieres montarlo igual, los pasos están en [original-copilot/README.md](original-copilot/README.md).
+Durante mi búsqueda no llenaba el Sheet a mano: le decía a Claude *"apliqué a X en Y"* y él lo registraba, además de analizar vacantes y prepararme para las entrevistas. Si usas Claude y quieres montarlo igual, los pasos están en [original-copilot/README.md](original-copilot/README.md). Ojo: esa es la versión 1, sin historial ni métricas. Unir el flujo con Claude y la plantilla nueva es una [idea abierta](docs/ideas.md) que cualquiera puede construir.
 
 ## Privacidad
 

@@ -1,40 +1,37 @@
 // lib/appsScript.js
 //
-// Este archivo SOLO se ejecuta en el servidor (Vercel), nunca en el navegador.
-// Next.js garantiza esto porque solo lo importan archivos dentro de app/api/*,
-// que son rutas de servidor. Si algun dia lo importas por error desde un
-// componente de cliente, Next.js te va a tirar un error en el build -- es
-// una proteccion extra, no solo disciplina.
+// Server-only. It is imported exclusively by app/api/* route handlers, so
+// it never ships to the browser.
 //
-// Aqui vive la unica referencia al token. Nada mas en el proyecto lo toca.
+// This is the only place that reads the Apps Script token.
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 const APPS_SCRIPT_TOKEN = process.env.APPS_SCRIPT_TOKEN;
 
 if ((!APPS_SCRIPT_URL || !APPS_SCRIPT_TOKEN) && process.env.DEMO_MODE !== 'true') {
-  // No lanzamos error en el import (rompería el build), pero sí avisamos
-  // fuerte en los logs de Vercel si faltan las variables de entorno.
+  // Do not throw at import time (it would break the build), but warn loudly
+  // in the Vercel logs when the environment variables are missing.
   console.warn(
-    '[appsScript] Faltan APPS_SCRIPT_URL o APPS_SCRIPT_TOKEN en las variables de entorno.'
+    '[appsScript] APPS_SCRIPT_URL or APPS_SCRIPT_TOKEN is missing from the environment.'
   );
 }
 
 /**
- * Trae TODAS las vacantes del Tracker.
+ * Loads EVERY application from the tracker.
  *
- * Requiere que el Apps Script tenga la accion "list" agregada
- * (ver README.md, seccion "Accion nueva requerida en Apps Script").
+ * Requires the "list" action in the v1 Apps Script
+ * (see original-copilot/apps-script-v1/Code.gs).
  */
 export async function listJobs() {
   const url = `${APPS_SCRIPT_URL}?action=list&token=${encodeURIComponent(APPS_SCRIPT_TOKEN)}`;
 
   const res = await fetch(url, {
     method: 'GET',
-    // Apps Script Web Apps responden con un redirect 302 antes del
-    // contenido real. 'follow' es el default de fetch, pero lo dejamos
-    // explicito porque es la causa #1 de que esto falle silenciosamente.
+    // Apps Script web apps answer with a 302 redirect before the real
+    // content. 'follow' is fetch's default; it is explicit here because a
+    // missing redirect is the #1 cause of silent failures.
     redirect: 'follow',
-    // Nunca cachear: siempre queremos el estado mas reciente del Sheet.
+    // Never cache: always read the latest state of the Sheet.
     cache: 'no-store',
   });
 
@@ -52,7 +49,7 @@ export async function listJobs() {
 }
 
 /**
- * Actualiza campos de una vacante especifica (ej: cambiar el Status).
+ * Updates fields of one application (e.g. change its Status).
  */
 export async function updateJob(jobId, fields) {
   const res = await fetch(APPS_SCRIPT_URL, {

@@ -6,7 +6,7 @@ body {
   @apply bg-paper text-ink font-sans;
 }
 
-/* Fondo tipo cuadricula de plano tecnico, muy sutil, en toda la pagina */
+/* Subtle blueprint grid behind the whole page */
 .blueprint-bg {
   background-color: #FAFAF7;
   background-image:
@@ -15,7 +15,7 @@ body {
   background-size: 24px 24px;
 }
 
-/* Etiqueta tipo "sello de plano" para el Job ID en cada tarjeta */
+/* Blueprint-style stamp for the Job ID on each card */
 .job-id-stamp {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

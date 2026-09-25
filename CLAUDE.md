@@ -1,34 +1,44 @@
 # CLAUDE.md
 
-Reglas del proyecto para cualquier sesión futura de Claude Code en este repo.
+Project rules for AI coding agents (Claude Code and similar) working in this repo.
 
-## Qué es esto
+## What this is
 
-- `sheets-template/`: producto principal. Google Sheet + Apps Script (tablero kanban, historial de etapas, métricas). Funciona sin IA.
-- `dashboard-nextjs/`: vitrina técnica. Next.js en modo demo (`DEMO_MODE=true`) con datos ficticios.
-- `ai-prompts/` y `original-copilot/`: prompts genéricos para cualquier chatbot y documentación de la v1 personal.
-- `docs/`: arquitectura, decisiones, métricas y lecciones.
+- `sheets-template/`: main product. Google Sheet + Apps Script (kanban board, stage history, metrics). Works without AI. UI and code comments are in Spanish on purpose: its users are Spanish-speaking job seekers.
+- `dashboard-nextjs/`: technical showcase. Next.js in demo mode (`DEMO_MODE=true`) with fictional data.
+- `ai-prompts/` and `original-copilot/`: provider-agnostic prompts and documentation of the v1 Claude-connected copilot (historical reference).
+- `docs/`: architecture, decisions, metric definitions, lessons learned, ideas.
 
-## Reglas no negociables
+## Non-negotiable rules
 
-1. **Cero secretos en git.** Antes de cada commit busca tokens, URLs `script.google.com/macros/s/...`, archivos `.env*`, contraseñas y cualquier contenido de `tracker-config*`. Revisa `git diff --staged`.
-2. **Cero datos personales.** Nada de CVs, empresas reales a las que se aplicó, reclutadores, correos, teléfonos ni roles objetivo específicos del autor.
-3. **No inventes métricas ni resultados.** Los números reales del README los aporta el autor. Los datos de demo son ficticios y están etiquetados como tales.
-4. **Nada sale a internet sin confirmación** (push, cambios de visibilidad, deploys).
-5. **Explica en lenguaje simple** cualquier paso manual para usuarios no técnicos.
+1. **No secrets in git.** Before every commit, search for tokens, `script.google.com/macros/s/...` URLs, `.env*` files, passwords and anything from `tracker-config*`. Review `git diff --staged`.
+2. **No personal data.** No CVs, real companies applied to, recruiters, emails, phone numbers or the author's specific target roles. Redact emails from screenshots.
+3. **Never invent metrics or results.** Demo and sample data are fictional and labeled as such.
+4. **Nothing goes online without confirmation** (push, visibility changes, deploys).
+5. **Explain manual steps in plain language** for non-technical users.
+6. **Do not ship untested integrations.** Ideas that cannot be tested end to end go to `docs/ideas.md`, not into the product.
 
-## Comandos útiles
+## Languages
+
+- English: `README.md`, `docs/`, `dashboard-nextjs/` (code, comments, UI), `original-copilot/how-it-worked.md`, this file.
+- Spanish: `README.es.md`, `sheets-template/` (UI, comments, `SETUP_GUIDE.es.md`), `ai-prompts/`, `original-copilot/README.md`.
+
+## Useful commands
 
 ```bash
+# Sheets template logic (runs the .gs files in Node, no Google needed)
+node --test sheets-template/tests/metrics.test.cjs
+
 # Dashboard
 cd dashboard-nextjs && npm install && npm test && npm run build
 DEMO_MODE=true npm run dev
 
-# Plantilla (requiere clasp login y .clasp.json local, ignorado por git)
+# Push template code to the owner's Sheet (needs clasp login and a local, git-ignored .clasp.json)
 cd sheets-template && clasp push
 ```
 
-## Convenciones
+## Conventions
 
-- Métricas: la definición oficial está en `docs/metrics.md`. Si cambias una fórmula en `sheets-template/Code.gs` o en `dashboard-nextjs/lib/metrics.js`, actualiza las dos y el documento.
-- Textos de la plantilla viven en el objeto `LABELS` (`sheets-template/Scripts.html`).
+- Metrics: the source of truth is `docs/metrics.md`. If you change a formula in `sheets-template/Metrics.gs` or `dashboard-nextjs/lib/metrics.js`, update both and the doc.
+- Template UI strings live in the `LABELS` object (`sheets-template/Scripts.html`).
+- Existing users' Sheets must keep working: column changes go through `migrateAppsHeaders_` in `Code.gs`, with a test.

@@ -77,6 +77,8 @@ v2 fixes this with an append-only `Historial` table (`timestamp, id, from, to, n
 
 Other lessons (idempotent side effects, deduplicating on a stable key, removing setup steps for non-technical users): [docs/lessons-learned.md](docs/lessons-learned.md).
 
+**Next step, not built yet:** put the v1 chat workflow on top of the v2 template, so an assistant writes through the same functions and every change lands in the event log. The design is in [docs/ideas.md](docs/ideas.md); it stays an idea until it can be tested end to end.
+
 ## Try it
 
 - **Live demo:** [job-search-copilot-demo.vercel.app](https://job-search-copilot-demo.vercel.app). Fictional companies; your changes stay in your browser.
@@ -98,7 +100,7 @@ sheets-template/     Google Sheets template (main product) + setup guides + test
 dashboard-nextjs/    Next.js dashboard, demo mode (DEMO_MODE=true) or Sheet-backed
 ai-prompts/          Self-contained prompts for any chatbot (Spanish)
 original-copilot/    v1 Claude-connected copilot: Apps Script API, generic system prompt, setup guide
-docs/                Architecture, decisions, metric definitions, lessons learned
+docs/                Architecture, decisions, metric definitions, lessons learned, ideas
 ```
 
 ## License

@@ -1,23 +1,22 @@
 // lib/metrics.js
 //
-// Metricas del pipeline. La definicion oficial de cada una esta en
-// docs/metrics.md, y la misma logica vive en sheets-template/Metrics.gs:
-// si cambias una formula aqui, cambiala alla tambien.
+// Pipeline metrics. Official definitions live in docs/metrics.md, and the
+// same logic lives in sheets-template/Metrics.gs: change both together.
 //
-// Cambios frente a la v1:
-// - La tasa de respuesta ya no cuenta "Saved" ni "Withdrawn" como
-//   respuestas. Denominador = postulaciones enviadas (sin las guardadas ni
-//   las retiradas antes de recibir respuesta). Numerador = las que llegaron
-//   a cualquier etapa que implique respuesta de la empresa (incluye rechazo).
-// - El tiempo por etapa se calcula desde el historial de eventos (entrar a
-//   una etapa -> salir de ella). Sin historial no se puede medir, y la
-//   funcion lo dice en vez de inventar un numero.
+// Changes from v1:
+// - Response rate no longer counts "Saved" or "Withdrawn" as replies.
+//   Denominator = sent applications (excluding saved ones and those
+//   withdrawn before any reply). Numerator = applications that reached any
+//   stage implying a reply from the company (rejection included).
+// - Time per stage comes from the event history (enter a stage -> leave
+//   it). Without history it cannot be measured, and the function says so
+//   instead of making up a number.
 
 import { STAGES } from './constants.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Roles por posicion: 1a = guardada, 2a = aplicada, 3 ultimas = cierres.
+// Roles by position: 1st = saved, 2nd = applied, last three = closed.
 export function stageRoles(stages = STAGES) {
   const n = stages.length;
   return {
@@ -56,7 +55,7 @@ export function computeMetrics(jobs, history = [], opts = {}) {
     return set;
   };
 
-  // ---- Respuesta, embudo y fuente ----
+  // ---- Response, funnel and source ----
   const pipelineIndex = Object.fromEntries(roles.pipeline.map((s, i) => [s, i]));
   const funnelCounts = roles.pipeline.map(() => 0);
   const bySourceMap = {};
@@ -103,7 +102,7 @@ export function computeMetrics(jobs, history = [], opts = {}) {
     .map((s) => ({ ...s, rate: s.applied ? s.responded / s.applied : null }))
     .sort((a, b) => b.applied - a.applied);
 
-  // ---- Dias por etapa (solo tramos completos, desde el historial) ----
+  // ---- Days per stage (completed stints only, from history) ----
   const durations = {};
   for (const list of Object.values(eventsById)) {
     const changes = list.filter((h) => h.to && h.from !== h.to);
@@ -122,7 +121,7 @@ export function computeMetrics(jobs, history = [], opts = {}) {
       samples: durations[s].length,
     }));
 
-  // ---- Por semana (ultimas 12) ----
+  // ---- Per week (last 12) ----
   const monday = startOfWeek(now);
   const weekly = Array.from({ length: 12 }, (_, i) => ({
     weekStart: new Date(monday - (11 - i) * 7 * DAY_MS).toISOString().slice(0, 10),
@@ -136,7 +135,7 @@ export function computeMetrics(jobs, history = [], opts = {}) {
     if (idx >= 0 && idx < 12) weekly[idx].count++;
   }
 
-  // ---- Estancadas ----
+  // ---- Stalled ----
   const staleJobs = [];
   let active = 0;
   for (const job of jobs) {

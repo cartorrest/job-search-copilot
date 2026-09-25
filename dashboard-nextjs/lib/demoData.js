@@ -1,9 +1,8 @@
 // lib/demoData.js
 //
-// Datos FICTICIOS para el modo demo. Empresas inventadas o de ficcion,
-// links a example.com, sin personas reales. Se generan con una semilla
-// fija, asi que la demo siempre arranca igual; las fechas son relativas
-// a "hoy" para que la demo nunca se vea vieja.
+// FICTIONAL data for demo mode: made-up or fictional companies, links to
+// example.com, no real people. A fixed seed makes the demo start the same
+// way every time; dates are relative to "today" so it never looks stale.
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -22,7 +21,7 @@ const SOURCES = ['LinkedIn', 'LinkedIn', 'Indeed', 'Referral', 'Company site', '
 const SALARIES = ['', 'USD 1,500-2,000', 'USD 2,000-2,500', 'USD 2,500-3,000'];
 const CVS = ['CV Data v2', 'CV Ops v1', 'CV General v3'];
 
-// Secuencias de etapas y cuantas veces aparece cada una (~30 en total).
+// Stage sequences and how often each one appears (~30 in total).
 const SCENARIOS = [
   { path: ['Applied'], weight: 11 },
   { path: ['Applied', 'Rejected'], weight: 5 },
