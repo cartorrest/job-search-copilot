@@ -4,7 +4,7 @@
 
 Lo construí para mi propia búsqueda de trabajo remoto. Ya conseguí trabajo, así que lo convertí en una plantilla para que tú también lo uses.
 
-[**Hacer mi copia**](SHEET_COPY_LINK) · [**Guía paso a paso**](sheets-template/SETUP_GUIDE.es.md) · [Ver demo](https://DEMO_URL) · [English](README.md)
+[**Hacer mi copia**](SHEET_COPY_LINK) · [**Guía paso a paso**](sheets-template/SETUP_GUIDE.es.md) · [Ver demo](https://job-search-copilot-demo.vercel.app) · [English](README.md)
 
 ![Tablero de la plantilla](docs/img/template-board.png)
 

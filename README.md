@@ -2,7 +2,7 @@
 
 **A job-search tracker I built for my own remote job search, rebuilt as a free Google Sheets template anyone can use.** Kanban board, an event log, funnel metrics and stall alerts, with optional AI prompts that work in any chatbot.
 
-[**Live demo**](https://DEMO_URL) (fictional data) · [**Get the template**](sheets-template/SETUP_GUIDE.md) · [Versión en español](README.es.md)
+[**Live demo**](https://job-search-copilot-demo.vercel.app) (fictional data) · [**Get the template**](sheets-template/SETUP_GUIDE.md) · [Versión en español](README.es.md)
 
 ![Demo dashboard](docs/img/demo-dashboard.png)
 
@@ -78,7 +78,7 @@ Other lessons (idempotent side effects, deduplicating on a stable key, removing 
 
 ## Try it
 
-- **Live demo:** [DEMO_URL](https://DEMO_URL). Fictional companies; your changes stay in your browser.
+- **Live demo:** [job-search-copilot-demo.vercel.app](https://job-search-copilot-demo.vercel.app). Fictional companies; your changes stay in your browser.
 - **Template:** [make a copy](SHEET_COPY_LINK) and follow the [setup guide](sheets-template/SETUP_GUIDE.md) ([español](sheets-template/SETUP_GUIDE.es.md)).
 - **AI prompts:** [ai-prompts/](ai-prompts/) (Spanish) and the [generic system prompt](original-copilot/system_prompt.generic.md).
 - **How v1 worked:** [original-copilot/how-it-worked.md](original-copilot/how-it-worked.md).
