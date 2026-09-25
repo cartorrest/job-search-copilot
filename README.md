@@ -82,7 +82,7 @@ Other lessons (idempotent side effects, deduplicating on a stable key, removing 
 - **Live demo:** [job-search-copilot-demo.vercel.app](https://job-search-copilot-demo.vercel.app). Fictional companies; your changes stay in your browser.
 - **Template:** [make a copy](https://docs.google.com/spreadsheets/d/1aMhLnESFdDVQW_BF3mCvEKvnzSgsn_lmgHHoIvxBlzY/copy) and follow the [setup guide](sheets-template/SETUP_GUIDE.md) ([español](sheets-template/SETUP_GUIDE.es.md)).
 - **AI prompts:** [ai-prompts/](ai-prompts/) (Spanish) and the [generic system prompt](original-copilot/system_prompt.generic.md).
-- **How v1 worked:** [original-copilot/how-it-worked.md](original-copilot/how-it-worked.md).
+- **How v1 worked:** [original-copilot/how-it-worked.md](original-copilot/how-it-worked.md), and a [step-by-step setup guide](original-copilot/README.md) (Spanish) for anyone who wants the Claude-connected version.
 
 ## Tech stack
 
@@ -97,7 +97,7 @@ Other lessons (idempotent side effects, deduplicating on a stable key, removing 
 sheets-template/     Google Sheets template (main product) + setup guides + tests
 dashboard-nextjs/    Next.js dashboard, demo mode (DEMO_MODE=true) or Sheet-backed
 ai-prompts/          Self-contained prompts for any chatbot (Spanish)
-original-copilot/    Generic system prompt and how the v1 copilot worked
+original-copilot/    v1 Claude-connected copilot: Apps Script API, generic system prompt, setup guide
 docs/                Architecture, decisions, metric definitions, lessons learned
 ```
 

@@ -69,6 +69,8 @@ Se crearon tres pestañas:
 
 **Job Tracker → Abrir tablero.**
 
+> ¿Prefieres abrirlo como página web, a pantalla completa en el computador y también en el celular? Mira [tu tablero como página web](#opcional-tu-tablero-como-página-web-computador-y-celular).
+
 <img src="../docs/img/setup-08-tablero.png" alt="Tablero de Job Tracker" width="520">
 
 La copia trae **postulaciones de ejemplo** (empresas ficticias) para que veas cómo funciona. Cuando quieras empezar con las tuyas: **Job Tracker → Borrar datos de ejemplo** (solo borra las de ejemplo, nunca las tuyas). Si luego quieres volver a verlas: **Cargar datos de ejemplo**.
@@ -101,19 +103,32 @@ Si el navegador no deja copiar automáticamente, aparece el texto seleccionado: 
 
 Más prompts listos: carpeta [ai-prompts](../ai-prompts/).
 
-## Opcional: usarlo desde el celular
+## Opcional: tu tablero como página web (computador y celular)
 
-La ventana del tablero funciona en computador. Para tenerlo como página en el celular:
+Hay dos formas de abrir el tablero. Puedes usar una, la otra o las dos: **los datos son los mismos**, siempre se guardan en tu Sheet.
+
+| | Desde el menú del Sheet | Como página web |
+|---|---|---|
+| Cómo se abre | Abres el Sheet → **Job Tracker → Abrir tablero** | Abres un link, como cualquier página |
+| Configuración | Ninguna | 2 minutos, una sola vez (pasos abajo) |
+| Computador | Sí, en una ventana dentro del Sheet | Sí, a pantalla completa en su propia pestaña |
+| Celular | No (la app de Sheets no muestra la ventana) | Sí, y lo puedes guardar como ícono en la pantalla de inicio |
+
+Si prefieres trabajar siempre desde la página web (en el computador y en el celular), haz esto una vez:
 
 1. En tu Sheet: **Extensiones → Apps Script**.
 2. Arriba a la derecha: **Implementar → Nueva implementación**.
-3. En el engranaje, elige **Aplicación web**.
+3. En el engranaje ⚙️ junto a "Seleccionar tipo", elige **Aplicación web**.
 4. **Ejecutar como: Yo**. **Quién tiene acceso: Solo yo**.
-5. Pulsa **Implementar** y copia la **URL de la aplicación web**. Ábrela en el celular (con tu misma cuenta de Google) y guárdala en la pantalla de inicio.
+5. Pulsa **Implementar** (si te pide autorizar, acepta como en el Paso 2) y copia la **URL de la aplicación web**.
+6. **En el computador:** abre esa URL y guárdala en favoritos.
+7. **En el celular:** ábrela en el navegador con tu misma cuenta de Google y usa **"Agregar a pantalla de inicio"**.
 
 Cada persona hace esto en **su propia copia**: la implementación no se copia con el Sheet, y la URL de otra persona no te sirve a ti.
 
-**Por qué es seguro:** con "Solo yo", esa URL solo funciona si has iniciado sesión con tu cuenta. Si alguien más la abre, Google le pide permiso y lo rechaza. No hay contraseñas ni tokens que se puedan filtrar.
+**Por qué es seguro:** con "Solo yo", esa URL solo funciona si iniciaste sesión con tu cuenta. Si alguien más la abre, Google le niega el acceso. No hay contraseñas ni tokens que se puedan filtrar.
+
+**Si cambias el código** (por ejemplo, los textos en `Scripts.html`), la página web sigue mostrando la versión anterior hasta que la actualices: **Implementar → Gestionar implementaciones → ✏️ → Versión: Nueva versión → Implementar**. La URL no cambia.
 
 ## Personalizar
 

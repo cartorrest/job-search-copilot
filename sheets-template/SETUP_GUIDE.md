@@ -29,7 +29,7 @@ This creates three sheets: **Postulaciones** (one row per application), **Histor
 ## Optional
 
 - **Email alerts:** put your address in **Config**. A daily trigger emails you once per application that has been stalled for N+ days; the flag resets on every stage change.
-- **Phone:** Extensions → Apps Script → Deploy → New deployment → Web app, **Execute as: Me**, **Who has access: Only myself**. Only you, signed in, can open that URL. Deployments are not copied with the Sheet, so each person deploys their own.
+- **As a web page (desktop and phone):** the board can also run as its own page, full screen in a browser tab on your computer and as a home-screen icon on your phone. Same data, same Sheet. Extensions → Apps Script → Deploy → New deployment → Web app, **Execute as: Me**, **Who has access: Only myself**, then bookmark the URL. Only you, signed in, can open it. Deployments are not copied with the Sheet, so each person deploys their own; after code changes, publish a new version under Manage deployments (the URL stays the same).
 - **Stages:** edit the list in **Config** (keep the order: 1st = saved, 2nd = applied, last three = accepted, rejected, withdrawn), then rerun first-time setup.
 - **Translate:** all UI strings live in the `LABELS` object in `Scripts.html`.
 

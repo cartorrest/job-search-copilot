@@ -1,0 +1,24 @@
+TRACKER CONFIG (archivo PRIVADO: súbelo solo al Conocimiento de tu Proyecto de Claude, nunca a GitHub)
+
+URL del tracker (web app de Apps Script, termina en /exec):
+PON_AQUI_LA_URL_DE_TU_WEB_APP
+
+Token de acceso (el mismo valor de TRACKER_TOKEN en las propiedades del script):
+PON_AQUI_TU_TOKEN
+
+Cómo llamar al tracker (siempre siguiendo redirecciones: curl -sL):
+
+- Buscar por empresa y cargo:
+  GET  {URL}?action=query&company=Acme&position=Analyst&token={TOKEN}
+
+- Traer un registro por ID:
+  GET  {URL}?action=get&jobId=JOB-0001&token={TOKEN}
+
+- Listar todo:
+  GET  {URL}?action=list&token={TOKEN}
+
+- Crear:
+  POST {URL}  body JSON: {"token":"{TOKEN}","action":"create","company":"Acme","position":"Analyst","jobUrl":"https://...","source":"LinkedIn"}
+
+- Actualizar:
+  POST {URL}  body JSON: {"token":"{TOKEN}","action":"update","jobId":"JOB-0001","fields":{"Status":"Interview","Next Step":"Prueba técnica"}}

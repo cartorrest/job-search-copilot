@@ -56,7 +56,7 @@ The original Apps Script is kept in [`apps-script-v1/Code.gs`](apps-script-v1/Co
 
 ## Rebuilding it yourself
 
-If you want the chat-driven version:
+If you want the chat-driven version (full step-by-step guide in Spanish: [README.md](README.md)):
 
 1. Deploy [`apps-script-v1/Code.gs`](apps-script-v1/Code.gs) bound to a Sheet, set `TRACKER_TOKEN` in Script Properties, and deploy as a web app.
 2. Put the web app URL and token in a **private** file in your assistant's knowledge (never in a repo).

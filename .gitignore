@@ -3,6 +3,7 @@
 !.env.example
 !.env.local.example
 tracker-config*
+!original-copilot/tracker-config.example.txt
 .clasp.json
 .clasprc.json
 .vercel
