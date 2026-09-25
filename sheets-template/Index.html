@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?!= include('Styles'); ?>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span id="app-title"></span>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" data-view="board" role="tab" id="tab-board"></button>
+        <button class="tab" data-view="metrics" role="tab" id="tab-metrics"></button>
+      </nav>
+      <button class="btn btn-primary" id="btn-new"></button>
+    </header>
+
+    <section class="toolbar" id="toolbar">
+      <input type="search" id="search" class="input">
+      <div class="segmented" id="type-filter"></div>
+      <label class="check"><input type="checkbox" id="show-closed"> <span id="lbl-show-closed"></span></label>
+      <button class="btn btn-ghost" id="btn-refresh" title=""></button>
+    </section>
+
+    <main>
+      <div id="loading" class="state"></div>
+      <div id="error" class="state state-error" hidden></div>
+      <section id="view-board" class="board" hidden></section>
+      <section id="view-metrics" class="metrics" hidden></section>
+    </main>
+
+    <!-- Nueva postulación -->
+    <div class="overlay" id="modal-new" hidden>
+      <form class="modal" id="form-new" autocomplete="off">
+        <div class="modal-head">
+          <h2 id="new-title"></h2>
+          <button type="button" class="icon-btn" data-close aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="grid-2" id="new-fields"></div>
+        <div id="dup-warning" class="warning" hidden></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close id="new-cancel"></button>
+          <button type="submit" class="btn btn-primary" id="new-submit"></button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Detalle -->
+    <div class="overlay" id="modal-detail" hidden>
+      <div class="modal modal-wide" id="detail"></div>
+    </div>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+
+    <?!= include('Scripts'); ?>
+  </body>
+</html>

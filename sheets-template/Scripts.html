@@ -1,0 +1,602 @@
+<script>
+  // ===================================================================
+  // TEXTOS DE LA INTERFAZ — para traducir, cambia solo este objeto.
+  // ===================================================================
+  const LABELS = {
+    appTitle: 'Job Tracker',
+    tabBoard: 'Tablero',
+    tabMetrics: 'Métricas',
+    newApp: '+ Nueva postulación',
+    search: 'Buscar empresa o cargo…',
+    all: 'Todas',
+    showClosed: 'Ver cerradas',
+    refresh: '↻ Actualizar',
+    loading: 'Cargando tu tablero…',
+    loadError: 'No pude leer el Sheet. Cierra esta ventana y vuelve a abrir el tablero. Detalle: ',
+    emptyColumn: 'Nada aquí todavía',
+    emptyBoard: 'Aún no tienes postulaciones. Crea la primera con “+ Nueva postulación” o carga datos de ejemplo desde el menú Job Tracker.',
+    daysStale: n => `${n} días sin movimiento`,
+    daysAgo: n => (n === 0 ? 'hoy' : n === 1 ? 'hace 1 día' : `hace ${n} días`),
+    moveTo: 'Mover a…',
+    saved: 'Guardado',
+    moved: (e, s) => `“${e}” → ${s}`,
+    saveError: 'No se pudo guardar. Revisa tu conexión e intenta de nuevo. Detalle: ',
+    // Formulario
+    newTitle: 'Nueva postulación',
+    cancel: 'Cancelar',
+    create: 'Guardar',
+    createAnyway: 'Guardar de todas formas',
+    required: 'Empresa/Institución y Cargo/Programa son obligatorios.',
+    duplicate: a => `Parece que ya existe: ${a.empresa} — ${a.cargo} (${a.id}, etapa “${a.etapa}”). Revisa antes de duplicarla.`,
+    fields: {
+      tipo: 'Tipo', empresa: 'Empresa / Institución', cargo: 'Cargo / Programa', link: 'Link de la vacante',
+      fuente: 'Fuente', fechaAplicacion: 'Fecha de aplicación', etapa: 'Etapa', cv: 'Versión de CV / carta',
+      salario: 'Salario', contacto: 'Contacto', proximoPaso: 'Próximo paso', notas: 'Notas',
+    },
+    sourceHint: 'LinkedIn, Indeed, Referido…',
+    // Detalle
+    openLink: 'Abrir vacante ↗',
+    stage: 'Etapa',
+    timeline: 'Línea de tiempo',
+    noTimeline: 'Sin historial todavía.',
+    created: 'Creada',
+    changed: (a, b) => (a ? `${a} → ${b}` : `Entró como ${b}`),
+    addNote: 'Agregar nota',
+    notePlaceholder: 'Ej.: Entrevista con el líder técnico. Preguntaron por SQL y un caso de negocio.',
+    details: 'Datos',
+    save: 'Guardar cambios',
+    close: 'Cerrar',
+    copyPrompt: 'Copiar prompt para IA',
+    promptCopied: 'Prompt copiado. Pégalo en ChatGPT, Gemini o Claude junto con la vacante y tu CV.',
+    promptManual: 'Tu navegador no dejó copiar automáticamente. Selecciona el texto y cópialo (Ctrl+C).',
+    // Métricas
+    kpiTotal: 'Postulaciones',
+    kpiActive: 'Activas',
+    kpiResponse: 'Tasa de respuesta',
+    kpiResponseHint: (r, a) => `${r} de ${a} enviadas recibieron respuesta`,
+    kpiStale: 'Estancadas',
+    kpiStaleHint: d => `${d}+ días sin movimiento`,
+    funnel: 'Embudo',
+    funnelHint: 'Cuántas postulaciones enviadas llegaron al menos a cada etapa.',
+    biggestDrop: d => `Donde más se caen: de ${d.from} a ${d.to} (se pierde el ${pct(d.loss)}).`,
+    avgDays: 'Días promedio en cada etapa',
+    avgDaysHint: 'Calculado desde Historial: tiempo entre entrar a una etapa y salir de ella.',
+    noData: 'Todavía no hay datos suficientes.',
+    weekly: 'Postulaciones por semana',
+    weeklyHint: 'Últimas 12 semanas, según la fecha de aplicación.',
+    bySource: 'Respuesta por fuente',
+    bySourceHint: 'Qué canales te traen respuestas, no solo volumen.',
+    source: 'Fuente', sent: 'Enviadas', answered: 'Respuestas', rate: 'Tasa',
+    samples: n => `${n} caso${n === 1 ? '' : 's'}`,
+    days: n => `${n.toFixed(1)} d`,
+  };
+
+  // Plantilla del prompt. Las reglas de veracidad son lo más importante.
+  const PROMPT_RULES = [
+    'No inventes experiencia, logros, herramientas, certificaciones, fechas ni métricas. Todo debe salir de mi CV.',
+    'Si falta información o algo es ambiguo, pregúntame antes de suponer.',
+    'No sacrifiques la veracidad por palabras clave de ATS: prefiero menos coincidencia que exagerar.',
+    'Sé concreto y breve. Nada de frases genéricas que suenen a IA.',
+  ];
+
+  function pct(x) { return x == null ? '—' : Math.round(x * 100) + '%'; }
+
+  // ===================================================================
+  // ESTADO
+  // ===================================================================
+  const state = {
+    data: null,            // { apps, history, config, metrics }
+    view: 'board',
+    type: '',              // '' = todas
+    search: '',
+    showClosed: false,
+    draggingId: null,
+  };
+
+  const $ = sel => document.querySelector(sel);
+  const el = (tag, attrs, ...children) => {
+    const node = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (v == null || v === false) return;
+      if (k === 'class') node.className = v;
+      else if (k === 'style') node.setAttribute('style', v);
+      else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v === true ? '' : v);
+    });
+    children.flat(Infinity).forEach(c => { if (c != null && c !== false) node.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    return node;
+  };
+
+  // google.script.run como promesa.
+  function server(fn, ...args) {
+    return new Promise((resolve, reject) => {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args);
+    });
+  }
+
+  // ===================================================================
+  // ARRANQUE
+  // ===================================================================
+  function initStaticTexts() {
+    document.title = LABELS.appTitle;
+    $('#app-title').textContent = LABELS.appTitle;
+    $('#tab-board').textContent = LABELS.tabBoard;
+    $('#tab-metrics').textContent = LABELS.tabMetrics;
+    $('#btn-new').textContent = LABELS.newApp;
+    $('#search').placeholder = LABELS.search;
+    $('#lbl-show-closed').textContent = LABELS.showClosed;
+    $('#btn-refresh').textContent = LABELS.refresh;
+    $('#loading').textContent = LABELS.loading;
+    $('#new-title').textContent = LABELS.newTitle;
+    $('#new-cancel').textContent = LABELS.cancel;
+    $('#new-submit').textContent = LABELS.create;
+  }
+
+  function bindEvents() {
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
+    $('#search').addEventListener('input', e => { state.search = e.target.value.toLowerCase(); render(); });
+    $('#show-closed').addEventListener('change', e => { state.showClosed = e.target.checked; render(); });
+    $('#btn-refresh').addEventListener('click', load);
+    $('#btn-new').addEventListener('click', openNewForm);
+    $('#form-new').addEventListener('submit', submitNewForm);
+    document.querySelectorAll('.overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o || e.target.closest('[data-close]')) o.hidden = true; });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.querySelectorAll('.overlay').forEach(o => { o.hidden = true; });
+    });
+  }
+
+  function load() {
+    $('#loading').hidden = false;
+    $('#error').hidden = true;
+    return server('getBoardData')
+      .then(data => { state.data = data; $('#loading').hidden = true; renderTypeFilter(); render(); })
+      .catch(err => { $('#loading').hidden = true; $('#error').hidden = false; $('#error').textContent = LABELS.loadError + (err && err.message || err); });
+  }
+
+  // Refresca datos y métricas sin mostrar "Cargando".
+  function reloadQuietly() {
+    return server('getBoardData').then(data => { state.data = data; render(); });
+  }
+
+  function setView(view) {
+    state.view = view;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.view === view));
+    render();
+  }
+
+  function renderTypeFilter() {
+    const box = $('#type-filter');
+    box.innerHTML = '';
+    [''].concat(state.data.config.types).forEach(t => {
+      box.append(el('button', {
+        type: 'button', class: state.type === t ? 'is-active' : '',
+        onclick: () => { state.type = t; renderTypeFilter(); render(); },
+      }, t || LABELS.all));
+    });
+  }
+
+  // ===================================================================
+  // HELPERS DE DATOS
+  // ===================================================================
+  function roles() {
+    const s = state.data.config.stages;
+    const n = s.length;
+    return { saved: s[0], applied: s[1], closed: s.slice(n - 3), open: s.slice(0, n - 3) };
+  }
+
+  function stageColor(stage) {
+    const i = state.data.config.stages.indexOf(stage);
+    return `var(--s${Math.max(0, Math.min(7, i))})`;
+  }
+
+  function daysSince(iso) {
+    if (!iso) return null;
+    const t = new Date(iso).getTime();
+    return isNaN(t) ? null : Math.floor((Date.now() - t) / 86400000);
+  }
+
+  function formatDate(iso, withTime) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const opts = { day: '2-digit', month: 'short', year: 'numeric' };
+    if (withTime) Object.assign(opts, { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('es', opts);
+  }
+
+  function isStale(app) {
+    if (roles().closed.includes(app.etapa)) return false;
+    const d = daysSince(app.fechaMovimiento);
+    return d !== null && d >= state.data.config.staleDays;
+  }
+
+  function filteredApps() {
+    return state.data.apps.filter(a => {
+      if (state.type && a.tipo !== state.type) return false;
+      if (state.search && !(a.empresa + ' ' + a.cargo).toLowerCase().includes(state.search)) return false;
+      return true;
+    });
+  }
+
+  function historyFor(id) {
+    return state.data.history.filter(h => h.id === id).sort((a, b) => new Date(a.ts) - new Date(b.ts));
+  }
+
+  function findApp(id) { return state.data.apps.find(a => a.id === id); }
+
+  function toast(msg, ms) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { t.hidden = true; }, ms || 3200);
+  }
+
+  // ===================================================================
+  // RENDER
+  // ===================================================================
+  function render() {
+    if (!state.data) return;
+    const board = state.view === 'board';
+    $('#view-board').hidden = !board;
+    $('#view-metrics').hidden = board;
+    $('#toolbar').querySelector('#show-closed').parentElement.hidden = !board;
+    if (board) renderBoard(); else renderMetrics();
+  }
+
+  function renderBoard() {
+    const root = $('#view-board');
+    root.innerHTML = '';
+    const apps = filteredApps();
+    if (!state.data.apps.length) {
+      root.append(el('div', { class: 'state' }, LABELS.emptyBoard));
+      return;
+    }
+    const r = roles();
+    const stages = state.showClosed ? state.data.config.stages : r.open;
+    stages.forEach(stage => {
+      const items = apps.filter(a => a.etapa === stage)
+        .sort((a, b) => new Date(b.fechaMovimiento || 0) - new Date(a.fechaMovimiento || 0));
+      const col = el('div', { class: 'column', 'data-stage': stage },
+        el('div', { class: 'column-head' },
+          el('span', { class: 'dot', style: `background:${stageColor(stage)}` }),
+          stage, el('span', { class: 'count' }, `(${items.length})`)),
+        items.length ? items.map(renderCard) : el('div', { class: 'empty' }, LABELS.emptyColumn));
+      col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('is-over'); });
+      col.addEventListener('dragleave', () => col.classList.remove('is-over'));
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('is-over');
+        const id = e.dataTransfer.getData('text/plain') || state.draggingId;
+        if (id) moveApp(id, stage);
+      });
+      root.append(col);
+    });
+  }
+
+  function renderCard(app) {
+    const stale = isStale(app);
+    const d = daysSince(app.fechaMovimiento);
+    const select = el('select', {
+      class: 'move-select', 'aria-label': LABELS.moveTo,
+      onclick: e => e.stopPropagation(),
+      onchange: e => { const v = e.target.value; e.target.value = ''; if (v) moveApp(app.id, v); },
+    }, el('option', { value: '' }, LABELS.moveTo),
+      state.data.config.stages.filter(s => s !== app.etapa).map(s => el('option', { value: s }, s)));
+
+    const card = el('article', {
+      class: 'card', draggable: 'true', style: `--card-accent:${stageColor(app.etapa)}`,
+      onclick: () => openDetail(app.id),
+      ondragstart: e => { state.draggingId = app.id; e.dataTransfer.setData('text/plain', app.id); card.classList.add('is-dragging'); },
+      ondragend: () => { state.draggingId = null; card.classList.remove('is-dragging'); },
+    },
+      el('p', { class: 'card-title' }, app.empresa),
+      el('p', { class: 'card-sub' }, app.cargo),
+      el('div', { class: 'chips' },
+        app.tipo === 'Beca' ? el('span', { class: 'chip chip-beca' }, app.tipo) : null,
+        app.fuente ? el('span', { class: 'chip' }, app.fuente) : null,
+        stale ? el('span', { class: 'chip chip-warn' }, LABELS.daysStale(d)) : null),
+      el('div', { class: 'card-foot' },
+        el('span', null, d === null ? '' : LABELS.daysAgo(d)),
+        select));
+    return card;
+  }
+
+  function moveApp(id, stage, note) {
+    const app = findApp(id);
+    if (!app || app.etapa === stage) return Promise.resolve();
+    const before = Object.assign({}, app);
+    // Actualización optimista: la tarjeta se mueve ya; si el servidor falla, vuelve.
+    app.etapa = stage;
+    app.fechaMovimiento = new Date().toISOString();
+    render();
+    return server('updateStage', id, stage, note || '')
+      .then(() => { toast(LABELS.moved(app.empresa, stage)); return reloadQuietly(); })
+      .catch(err => { Object.assign(app, before); render(); toast(LABELS.saveError + (err && err.message || err), 6000); });
+  }
+
+  // ---------- Métricas ----------
+  function renderMetrics() {
+    const m = state.data.metrics;
+    const root = $('#view-metrics');
+    root.innerHTML = '';
+
+    root.append(el('div', { class: 'kpis' },
+      kpi(m.total, LABELS.kpiTotal),
+      kpi(m.active, LABELS.kpiActive),
+      kpi(pct(m.responseRate), LABELS.kpiResponse, m.applied ? LABELS.kpiResponseHint(m.responded, m.applied) : ''),
+      kpi(m.staleApps.length, LABELS.kpiStale, LABELS.kpiStaleHint(m.staleDays))));
+
+    // Embudo
+    const maxF = Math.max(1, ...m.funnel.map(f => f.count));
+    root.append(panel(LABELS.funnel, LABELS.funnelHint,
+      m.applied ? m.funnel.map(f => barRow(f.stage, f.count / maxF, `${f.count} · ${pct(f.pctOfApplied)}`, stageColor(f.stage))) : empty(),
+      m.biggestDrop && m.biggestDrop.lost > 0 ? el('div', { class: 'callout' }, LABELS.biggestDrop(m.biggestDrop)) : null));
+
+    // Días por etapa
+    const maxD = Math.max(1, ...m.avgDaysByStage.map(s => s.avgDays));
+    root.append(panel(LABELS.avgDays, LABELS.avgDaysHint,
+      m.avgDaysByStage.length
+        ? m.avgDaysByStage.map(s => barRow(s.stage, s.avgDays / maxD, LABELS.days(s.avgDays), stageColor(s.stage), LABELS.samples(s.samples)))
+        : empty()));
+
+    // Por semana
+    const maxW = Math.max(1, ...m.weekly.map(w => w.count));
+    root.append(panel(LABELS.weekly, LABELS.weeklyHint,
+      el('div', { class: 'weeks' }, m.weekly.map(w => el('div', { class: 'week', title: w.weekStart },
+        el('span', { class: 'week-val' }, w.count || ''),
+        el('div', { class: 'week-bar', style: `height:${(w.count / maxW) * 100}%` }),
+        el('span', { class: 'week-lbl' }, w.weekStart.slice(8, 10) + '/' + w.weekStart.slice(5, 7)))))));
+
+    // Por fuente
+    root.append(panel(LABELS.bySource, LABELS.bySourceHint,
+      m.bySource.length
+        ? el('table', { class: 'tbl' },
+          el('thead', null, el('tr', null, el('th', null, LABELS.source), el('th', { class: 'num' }, LABELS.sent), el('th', { class: 'num' }, LABELS.answered), el('th', { class: 'num' }, LABELS.rate))),
+          el('tbody', null, m.bySource.map(s => el('tr', null,
+            el('td', null, s.source), el('td', { class: 'num' }, s.applied), el('td', { class: 'num' }, s.responded), el('td', { class: 'num' }, pct(s.rate))))))
+        : empty()));
+  }
+
+  function kpi(value, label, hint) {
+    return el('div', { class: 'kpi' }, el('div', { class: 'kpi-value' }, value), el('div', { class: 'kpi-label' }, label), hint ? el('div', { class: 'kpi-hint' }, hint) : null);
+  }
+  function panel(title, hint, ...content) {
+    return el('section', { class: 'panel' }, el('h3', null, title), el('p', { class: 'hint' }, hint), content);
+  }
+  function barRow(label, ratio, value, color, tooltip) {
+    return el('div', { class: 'bar-row', title: tooltip || '' },
+      el('span', { class: 'bar-label' }, label),
+      el('div', { class: 'bar-track' }, el('div', { class: 'bar-fill', style: `width:${Math.max(2, ratio * 100)}%;background:${color}` })),
+      el('span', { class: 'bar-val' }, value));
+  }
+  function empty() { return el('p', { class: 'hint' }, LABELS.noData); }
+
+  // ===================================================================
+  // NUEVA POSTULACIÓN
+  // ===================================================================
+  function field(name, control, full) {
+    return el('div', { class: 'field' + (full ? ' full' : '') }, el('label', { for: 'f-' + name }, LABELS.fields[name]), control);
+  }
+
+  function openNewForm() {
+    const cfg = state.data.config;
+    const today = new Date();
+    const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    const box = $('#new-fields');
+    box.innerHTML = '';
+    box.append(
+      field('tipo', el('select', { class: 'input', id: 'f-tipo', name: 'tipo' }, cfg.types.map(t => el('option', { value: t }, t)))),
+      field('etapa', el('select', { class: 'input', id: 'f-etapa', name: 'etapa' }, cfg.stages.map(s => el('option', { value: s, selected: s === roles().applied }, s)))),
+      field('empresa', el('input', { class: 'input', id: 'f-empresa', name: 'empresa', required: true })),
+      field('cargo', el('input', { class: 'input', id: 'f-cargo', name: 'cargo', required: true })),
+      field('link', el('input', { class: 'input', id: 'f-link', name: 'link', type: 'url', placeholder: 'https://…' }), true),
+      field('fuente', el('input', { class: 'input', id: 'f-fuente', name: 'fuente', placeholder: LABELS.sourceHint, list: 'sources' })),
+      field('fechaAplicacion', el('input', { class: 'input', id: 'f-fechaAplicacion', name: 'fechaAplicacion', type: 'date', value: iso })),
+      field('cv', el('input', { class: 'input', id: 'f-cv', name: 'cv' })),
+      field('salario', el('input', { class: 'input', id: 'f-salario', name: 'salario' })),
+      field('contacto', el('input', { class: 'input', id: 'f-contacto', name: 'contacto' })),
+      field('proximoPaso', el('input', { class: 'input', id: 'f-proximoPaso', name: 'proximoPaso' })),
+      field('notas', el('textarea', { class: 'input', id: 'f-notas', name: 'notas' }), true),
+      el('datalist', { id: 'sources' }, Array.from(new Set(state.data.apps.map(a => a.fuente).filter(Boolean))).map(s => el('option', { value: s }))));
+    $('#dup-warning').hidden = true;
+    $('#new-submit').textContent = LABELS.create;
+    $('#form-new').dataset.force = '';
+    $('#modal-new').hidden = false;
+    $('#f-empresa').focus();
+  }
+
+  function submitNewForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form).entries());
+    if (!data.empresa.trim() || !data.cargo.trim()) { toast(LABELS.required); return; }
+    data.force = form.dataset.force === '1';
+    const btn = $('#new-submit');
+    btn.disabled = true;
+    server('createApplication', data)
+      .then(res => {
+        if (res.duplicate) {
+          $('#dup-warning').hidden = false;
+          $('#dup-warning').textContent = LABELS.duplicate(res.duplicate);
+          btn.textContent = LABELS.createAnyway;
+          form.dataset.force = '1';
+          return;
+        }
+        $('#modal-new').hidden = true;
+        toast(LABELS.saved);
+        return reloadQuietly();
+      })
+      .catch(err => toast(LABELS.saveError + (err && err.message || err), 6000))
+      .finally(() => { btn.disabled = false; });
+  }
+
+  // ===================================================================
+  // DETALLE
+  // ===================================================================
+  function openDetail(id) {
+    const app = findApp(id);
+    if (!app) return;
+    const box = $('#detail');
+    box.innerHTML = '';
+
+    const stageSelect = el('select', { class: 'input', onchange: e => moveApp(app.id, e.target.value).then(() => openDetail(app.id)) },
+      state.data.config.stages.map(s => el('option', { value: s, selected: s === app.etapa }, s)));
+
+    const editable = ['tipo', 'link', 'fuente', 'cv', 'salario', 'contacto', 'proximoPaso', 'notas'];
+    const inputs = {};
+    const fields = editable.map(name => {
+      let control;
+      if (name === 'tipo') control = el('select', { class: 'input' }, state.data.config.types.map(t => el('option', { value: t, selected: t === app.tipo }, t)));
+      else if (name === 'notas') control = el('textarea', { class: 'input' }, app.notas);
+      else control = el('input', { class: 'input', value: app[name] || '' });
+      inputs[name] = control;
+      return field(name, control, name === 'notas' || name === 'link');
+    });
+
+    const noteInput = el('textarea', { class: 'input', placeholder: LABELS.notePlaceholder });
+    const promptOut = el('textarea', { class: 'input prompt-out', readonly: true, hidden: true });
+
+    box.append(
+      el('div', { class: 'modal-head' },
+        el('div', null,
+          el('h2', null, app.empresa),
+          el('p', { class: 'sub' }, `${app.cargo} · ${app.id}`)),
+        el('button', { class: 'icon-btn', 'data-close': true, 'aria-label': LABELS.close }, '×')),
+      el('div', { class: 'detail-grid' },
+        el('div', null,
+          el('p', { class: 'section-title' }, LABELS.stage),
+          stageSelect,
+          app.link ? el('p', null, el('a', { href: app.link, target: '_blank', rel: 'noopener' }, LABELS.openLink)) : null,
+          el('p', { class: 'section-title', style: 'margin-top:16px' }, LABELS.details),
+          el('div', { class: 'grid-2' }, fields),
+          el('div', { class: 'modal-foot' },
+            el('button', { class: 'btn btn-ghost', onclick: () => copyPrompt(app, promptOut) }, LABELS.copyPrompt),
+            el('button', { class: 'btn btn-primary', onclick: () => saveDetail(app, inputs) }, LABELS.save)),
+          promptOut),
+        el('div', null,
+          el('p', { class: 'section-title' }, LABELS.timeline),
+          renderTimeline(app),
+          el('div', { class: 'note-box' }, noteInput,
+            el('button', { class: 'btn btn-ghost btn-small', onclick: () => saveNote(app, noteInput) }, LABELS.addNote)))));
+
+    $('#modal-detail').hidden = false;
+  }
+
+  function renderTimeline(app) {
+    const events = historyFor(app.id);
+    if (!events.length) return el('p', { class: 'hint' }, LABELS.noTimeline);
+    return el('ul', { class: 'timeline' }, events.slice().reverse().map(h => {
+      const isNote = h.prev === h.next;
+      return el('li', { class: isNote ? 'is-note' : '' },
+        el('div', { class: 'tl-date' }, formatDate(h.ts, true)),
+        isNote ? null : el('div', { class: 'tl-text' }, el('strong', null, LABELS.changed(h.prev, h.next))),
+        h.nota ? el('div', { class: 'tl-text' }, h.nota) : null);
+    }));
+  }
+
+  function saveDetail(app, inputs) {
+    const fields = {};
+    Object.keys(inputs).forEach(k => { fields[k] = inputs[k].value; });
+    server('updateFields', app.id, fields)
+      .then(() => { toast(LABELS.saved); return reloadQuietly(); })
+      .then(() => openDetail(app.id))
+      .catch(err => toast(LABELS.saveError + (err && err.message || err), 6000));
+  }
+
+  function saveNote(app, input) {
+    const text = input.value.trim();
+    if (!text) return;
+    server('addNote', app.id, text)
+      .then(() => reloadQuietly())
+      .then(() => { toast(LABELS.saved); openDetail(app.id); })
+      .catch(err => toast(LABELS.saveError + (err && err.message || err), 6000));
+  }
+
+  // ===================================================================
+  // PROMPT PARA IA (opcional, sin API keys)
+  // ===================================================================
+  function buildPrompt(app) {
+    const r = roles();
+    const stages = state.data.config.stages;
+    const idx = stages.indexOf(app.etapa);
+    const isScholarship = app.tipo === 'Beca';
+    const doc = isScholarship ? 'mi CV y mi carta de motivación' : 'mi CV';
+    let task;
+    if (idx <= stages.indexOf(r.applied)) {
+      task = [
+        `1. Analiza la ${isScholarship ? 'convocatoria' : 'vacante'} frente a ${doc}. Usa este formato exacto:`,
+        'MATCH: XX%', 'WHY:', '- …', 'GAPS:', '- …', 'RECOMMENDATION: APLICAR / CONSIDERAR / DESCARTAR',
+        `2. Sugiere ajustes concretos a ${doc} usando SOLO experiencia real que aparezca en el documento.`,
+      ];
+    } else if (r.closed.includes(app.etapa)) {
+      task = ['Ayúdame a sacar aprendizajes de este proceso: qué pudo influir en el resultado y qué ajustaría para las próximas postulaciones parecidas.'];
+    } else if (idx >= stages.length - 4) {
+      task = ['Tengo una oferta o estoy en la etapa final. Ayúdame a evaluarla y a preparar preguntas y una negociación razonable, sin inventar datos del mercado que no puedas respaldar.'];
+    } else {
+      task = [
+        'Prepárame para la siguiente conversación de este proceso:',
+        '- "Háblame de ti" adaptado a este rol (máx. 1 minuto).',
+        '- 8 preguntas probables y cómo responderlas con ejemplos STAR reales de mi CV.',
+        '- 3 preguntas inteligentes para hacerle al entrevistador.',
+        '- Qué resaltar y qué evitar.',
+      ];
+    }
+    const timeline = historyFor(app.id).map(h => `- ${formatDate(h.ts)}: ${h.prev === h.next ? 'Nota' : LABELS.changed(h.prev, h.next)}${h.nota ? ' — ' + h.nota : ''}`);
+
+    return [
+      'Actúa como asesor de búsqueda de empleo y becas.',
+      '',
+      'REGLAS (obligatorias):',
+      PROMPT_RULES.map((x, i) => `${i + 1}. ${x}`).join('\n'),
+      '',
+      'DATOS DE LA POSTULACIÓN:',
+      `- Tipo: ${app.tipo}`,
+      `- ${isScholarship ? 'Institución' : 'Empresa'}: ${app.empresa}`,
+      `- ${isScholarship ? 'Programa' : 'Cargo'}: ${app.cargo}`,
+      app.link ? `- Link: ${app.link}` : null,
+      app.fuente ? `- Fuente: ${app.fuente}` : null,
+      `- Etapa actual: ${app.etapa}`,
+      app.proximoPaso ? `- Próximo paso: ${app.proximoPaso}` : null,
+      app.notas ? `- Notas: ${app.notas}` : null,
+      timeline.length ? 'HISTORIAL:\n' + timeline.join('\n') : null,
+      '',
+      'TAREA:',
+      task.join('\n'),
+      '',
+      `DESCRIPCIÓN DE LA ${isScholarship ? 'CONVOCATORIA' : 'VACANTE'}:`,
+      '[PEGA AQUÍ EL TEXTO COMPLETO]',
+      '',
+      `${doc.toUpperCase()}:`,
+      '[PEGA AQUÍ EL TEXTO O ADJUNTA EL ARCHIVO]',
+    ].filter(x => x !== null).join('\n');
+  }
+
+  function copyPrompt(app, out) {
+    const text = buildPrompt(app);
+    out.value = text;
+    const done = () => toast(LABELS.promptCopied, 5000);
+    const manual = () => { out.hidden = false; out.focus(); out.select(); toast(LABELS.promptManual, 6000); };
+    // En la ventana del Sheet el portapapeles puede estar bloqueado: probamos dos métodos y, si no, lo mostramos.
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => (legacyCopy(out) ? done() : manual()));
+    } else if (legacyCopy(out)) done(); else manual();
+  }
+
+  function legacyCopy(out) {
+    try {
+      out.hidden = false;
+      out.select();
+      const ok = document.execCommand('copy');
+      if (ok) out.hidden = true;
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  // ===================================================================
+  initStaticTexts();
+  bindEvents();
+  load();
+</script>

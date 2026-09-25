@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-paper text-ink font-sans;
+}
+
+/* Fondo tipo cuadricula de plano tecnico, muy sutil, en toda la pagina */
+.blueprint-bg {
+  background-color: #FAFAF7;
+  background-image:
+    linear-gradient(rgba(46, 111, 149, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 111, 149, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Etiqueta tipo "sello de plano" para el Job ID en cada tarjeta */
+.job-id-stamp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}

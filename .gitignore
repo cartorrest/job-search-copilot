@@ -1,0 +1,26 @@
+# Secretos y configuración local
+.env*
+!.env.example
+!.env.local.example
+tracker-config*
+.clasp.json
+.clasprc.json
+.vercel
+
+# Dependencias y builds
+node_modules/
+.next/
+out/
+
+# Documentos privados
+*.docx
+*.pdf
+!docs/img/*.pdf
+CVs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Local de Claude Code
+.claude/
